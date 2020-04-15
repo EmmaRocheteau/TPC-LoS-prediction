@@ -2,29 +2,38 @@ Running the models
 ==================================
 
 1) Follow the instructions in the `README.md` file in the eICU_preprocessing directory.
-2) You can run the tpc and lstm models with:
+
+2) You can run all the models in your terminal. Set the working directory to the eICU-LoS-prediction, and run the following:
+
     ```
     python3 -m models.run_tpc
-    python3 -m models.run_lstm
     ```
-3) Replace the eICU_paths in `create_all_tables.sql` and `run_all_preprocessing.py` using find and replace for 
-`'/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'` so that they run on your local computer.
-4) In your terminal: 
+    
+    Note that your experiment can be customised by using command line arguments e.g.
+    
     ```
-    psql 'dbname=eicu user=eicu options=--search_path=eicu'
+    python3 -m models.run_tpc --model_type tpc --n_layers 4 --kernel_size 3 --no_temp_kernels 10 --point_size 10 --last_linear_size 20 --diagnosis_size 20 --batch_size 64 --learning_rate 0.001 --main_dropout_rate 0.3 --temp_dropout_rate 0.1 
     ```
-    Inside the psql console:
+    
+    Each experiment you run will create a directory within models/experiments. The naming of the directory is based on 
+    the date and time that you ran the experiment (to ensure that there are no name clashes). The experiments are saved 
+    in the standard trixi format: https://trixi.readthedocs.io/en/latest/_api/trixi.experiment.html.
+    
+3) The hyperparameter searches can be replicated by running:
+
     ```
-    \i {path_to_repository}/eICU_preprocessing/create_all_tables.sql
+    python3 -m models.hyperparameters.tpc
     ```
-    To quit the psql console:
+ 
+    Trixi provides a useful way to visualise effects of the hyperparameters (after running the following command, navigate to http://localhost:8080 in your browser):
+    
     ```
-    \q
+    python3 -m trixi.browser --port 8080 models/hyperparameters/TPC
     ```
-5) To run the preprocessing scripts in your terminal:
+    
+    The final experiments for the paper are found in models/scripts:
+    
     ```
-    python3 {path_to_repository}/eICU_preprocessing/run_all_preprocessing.py
+    python3 -m models.scripts.tpc
     ```
 
-Running the models
-==================================
