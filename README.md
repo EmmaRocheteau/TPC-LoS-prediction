@@ -18,10 +18,7 @@ Records, such as skewness, irregular sampling and missing data. In doing so, we 
 benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
 
 ## Running the models
-
 ### eICU Pre-processing
-
-
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
 
 2) Follow the instructions: https://eicu-crd.mit.edu/tutorials/install_eicu_locally/ to ensure the correct connection configuration. 
@@ -54,8 +51,6 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 
    
 ### Running the models
-
-
 1) Once you have run the pre-processing steps you can run all the models in your terminal. Set the working directory to the eICU-LoS-prediction, and run the following:
 
     ```
