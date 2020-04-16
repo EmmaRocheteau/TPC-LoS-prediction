@@ -1,4 +1,5 @@
-# eICU Length of Stay Prediction
+eICU Length of Stay Prediction
+===============================
 
 This repository contains the code used for Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit.
 
