@@ -1,12 +1,11 @@
-eICU LoS Prediction
-=========================
+# eICU Length of Stay Prediction
 
 This repository contains the code used for Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit.
 
-##Citation
+## Citation
 If you use this code or the models in your research, please cite the following publication:
 
-##Motivation
+## Motivation
 The pressure of ever-increasing patient demand and budget restrictions make hospital bed management a daily challenge 
 for clinical staff. Most critical, is the efficient allocation of resource-heavy Intensive Care Unit (ICU) beds to the 
 patients who need life support. Central to solving this problem is knowing for how long the current set of ICU patients 
@@ -17,9 +16,9 @@ domain-specific approach. We specifically design the model to mitigate for commo
 Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance 
 benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
 
-##Running the models
+## Running the models
 
-###eICU Pre-processing
+### eICU Pre-processing
 
 
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
@@ -53,7 +52,7 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
     python3 {path_to_repository}/eICU_preprocessing/run_all_preprocessing.py
 
    
-###Running the models
+### Running the models
 
 
 1) Once you have run the pre-processing steps you can run all the models in your terminal. Set the working directory to the eICU-LoS-prediction, and run the following:
