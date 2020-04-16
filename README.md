@@ -48,7 +48,7 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 
     ```
     python3 {path_to_repository}/eICU_preprocessing/run_all_preprocessing.py
-
+    ```
    
 ### Running the models
 1) Once you have run the pre-processing steps you can run all the models in your terminal. Set the working directory to the eICU-LoS-prediction, and run the following:
