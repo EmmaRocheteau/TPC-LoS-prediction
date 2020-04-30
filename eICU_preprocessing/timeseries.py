@@ -14,7 +14,7 @@ def reconfigure_timeseries(timeseries, offset_column, feature_column=None, test=
     timeseries.index = pd.MultiIndex.from_tuples(timeseries.index, names=['patient', 'time'])
     return timeseries
 
-def resample_and_mask(timeseries, eICU_path, header, mask_decay=True, decay_rate = 4/3, test=False,
+def resample_and_mask(timeseries, eICU_path, header, mask_decay=True, decay_rate=4/3, test=False,
                        verbose=False, length_limit=24*14):
     if test:
         mask_decay = False
@@ -67,7 +67,7 @@ def resample_and_mask(timeseries, eICU_path, header, mask_decay=True, decay_rate
 
     # clip to length_limit
     if length_limit is not None:
-        within_length_limit = resampled.index.get_level_values(1) < 24 * 7
+        within_length_limit = resampled.index.get_level_values(1) < length_limit
         resampled = resampled.loc[within_length_limit]
         mask = mask.loc[within_length_limit]
 

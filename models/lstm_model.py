@@ -43,8 +43,8 @@ class BaseLSTM(nn.Module):
 
         self.relu = nn.ReLU()
         self.hardtanh = nn.Hardtanh(min_val=1 / 48, max_val=100)  # keep the end predictions between half an hour and 100 days
-        self.dropout_lstm = nn.Dropout(p=self.lstm_dropout_rate)
-        self.dropout_main = nn.Dropout(p=self.main_dropout_rate)
+        self.lstm_dropout = nn.Dropout(p=self.lstm_dropout_rate)
+        self.main_dropout = nn.Dropout(p=self.main_dropout_rate)
         self.msle_loss = MSLELoss()
         self.mse_loss = MSELoss()
 
@@ -133,23 +133,23 @@ class BaseLSTM(nn.Module):
                 X_lstm, hidden = self.channelwise_lstm_list[i](X_rearranged[:, i, :, :].permute(2, 0, 1))
                 lstm_output = cat(self.remove_none((lstm_output, X_lstm)), dim=2)
 
-        X_final = self.relu(self.dropout_lstm(lstm_output.permute(1, 2, 0)))
+        X_final = self.relu(self.lstm_dropout(lstm_output.permute(1, 2, 0)))
 
-        diagnoses_enc = self.relu(self.dropout_main(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
+        diagnoses_enc = self.relu(self.main_dropout(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
 
         # note that we cut off at 5 hours here because the model is only valid from 5 hours onwards
         combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
                                  diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
                                  X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
 
-        last_point = self.relu(self.dropout_main(self.bn_point_last(self.point(combined_features))))
+        last_point = self.relu(self.main_dropout(self.bn_point_last(self.point(combined_features))))
 
         if self.no_exp:
             predictions = self.hardtanh(self.point_final(last_point).view(B, T - 5))  # B * (T - 5)
         else:
             predictions = self.hardtanh(exp(self.point_final(last_point).view(B, T - 5)))  # B * (T - 5)
 
-        return predictions  # B * T
+        return predictions
 
     def loss(self, y_hat, y, mask, seq_lengths, device, sum_losses, loss_type):
         bool_type = torch.cuda.BoolTensor if device == torch.device('cuda') else torch.BoolTensor

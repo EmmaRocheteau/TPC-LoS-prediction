@@ -10,6 +10,7 @@ no_lab_indices = list(range(87))
 no_lab_indices = [x for x in no_lab_indices if x not in lab_indices]
 no_labs_to_keep = [0] + [(i + 1) for i in no_lab_indices] + [(i + 88) for i in no_lab_indices] + [-1]
 
+
 class eICUReader(object):
 
     def __init__(self, data_path, device=None, labs_only=False, no_labs=False):
