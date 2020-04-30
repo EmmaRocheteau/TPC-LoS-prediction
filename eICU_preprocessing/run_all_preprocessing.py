@@ -3,8 +3,11 @@ from eICU_preprocessing.diagnoses import diagnoses_main
 from eICU_preprocessing.flat_and_labels import flat_and_labels_main
 from eICU_preprocessing.split_train_test import split_train_test
 import os
+import json
 
-eICU_path = '/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'
+with open('paths.json', 'r') as f:
+    eICU_path = json.load(f)["eICU_path"]
+    project_directory = json.load(f)["project_directory"]
 
 if __name__=='__main__':
     print('==> Removing the stays.txt file if it exists...')

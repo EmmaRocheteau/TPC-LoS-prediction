@@ -5,6 +5,7 @@ from trixi.util import Config
 import argparse
 from models.experiment_template import ExperimentTemplate
 
+
 class BaselineTransformer(ExperimentTemplate):
     def setup(self):
         self.setup_template()
