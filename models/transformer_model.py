@@ -5,13 +5,13 @@ import torch.nn as nn
 from models.tpc_model import MSLELoss, MSELoss, MyBatchNorm1d, EmptyModule
 from torch import exp, cat
 
-# taken from https://pytorch.org/tutorials/beginner/transformer_tutorial.html but:
-    # no dropout
-    # dimensions/shape of pe changed
-# note that I am using the positional encodings suggested by Vaswani et al. as the Attend and Diagnose authors do not
-# specify exactly how they do their positional encodings.
+# PositionalEncoding adapted from https://pytorch.org/tutorials/beginner/transformer_tutorial.html. I made the following
+# changes:
+    # Took out the dropout
+    # Changed the dimensions/shape of pe
+# I am using the positional encodings suggested by Vaswani et al. as the Attend and Diagnose authors do not specify in
+# detail how they do their positional encodings.
 class PositionalEncoding(nn.Module):
-
     def __init__(self, d_model, max_len=14*24):
         super(PositionalEncoding, self).__init__()
 
@@ -24,9 +24,10 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, X):
-        # X is B * (2F + 2) * T
-        X = X + self.pe[:, :, :X.size(2)]
-        return X
+        # X is B * d_model * T
+        # self.pe[:, :, :X.size(2)] is 1 * d_model * T but is broadcast to B when added
+        X = X + self.pe[:, :, :X.size(2)]  # B * d_model * T
+        return X  # B * d_model * T
 
 
 class TransformerEncoder(nn.Module):
@@ -44,13 +45,14 @@ class TransformerEncoder(nn.Module):
     def _causal_mask(self, size=None):
         mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-        return mask
+        return mask  # T * T
 
     def forward(self, X, T):
         # X is B * (2F + 2) * T
-        # (the batch is padded to the longest sequence)
-        X = self.input_embedding(X) * math.sqrt(self.d_model)
-        X = self.pos_encoder(X)
+
+        # multiplication by root(d_model) as described in Vaswani et al. 2017 section 3.4
+        X = self.input_embedding(X) * math.sqrt(self.d_model)  # B * d_model * T
+        X = self.pos_encoder(X)  # B * d_model * T
         X = self.transformer_encoder(src=X.permute(2, 0, 1), mask=self._causal_mask(size=T))  # T * B * d_model
         return X.permute(1, 2, 0)  # B * d_model * T
 
@@ -168,173 +170,3 @@ class Transformer(nn.Module):
         elif loss_type == 'mse':
             loss = self.mse_loss(y_hat, y, mask.type(bool_type), seq_lengths, sum_losses)
         return loss
-
-
-# partially adapted from https://github.com/khirotaka/SAnD
-class PositionalEncodingorig(nn.Module):
-    def __init__(self, d_model, max_seq_len=14*24) -> None:
-        super(PositionalEncoding, self).__init__()
-        self.d_model = d_model
-
-        pe = torch.zeros(max_seq_len, d_model)
-
-        for pos in range(max_seq_len):
-            for i in range(0, d_model, 2):
-                pe[pos, i] = math.sin(pos / (10000 ** ((2 * i) / d_model)))
-                pe[pos, i+1] = math.cos(pos / (10000 ** ((2 * (i+1)) / d_model)))
-
-        pe = pe.unsqueeze(0)
-        self.register_buffer("pe", pe)
-
-    def forward(self, x) -> torch.Tensor:
-        seq_len = x.shape[1]
-        x = math.sqrt(self.d_model) * x  # root(d_model scaling is usually applied at the attention stage but for some reason is here)
-        x = x + self.pe[:, :seq_len].requires_grad_(False)  # positional encoded added ontop of the data
-        return x
-
-
-# find the importance of this and see if it's possible to modify the other classes with it
-class DenseInterpolation(nn.Module):
-    def __init__(self, seq_len: int, factor: int) -> None:
-        """
-        :param seq_len: sequence length
-        :param factor: factor M
-        """
-        super(DenseInterpolation, self).__init__()
-
-        W = np.zeros((factor, seq_len), dtype=np.float32)
-
-        for t in range(seq_len):
-            s = np.array((factor * (t + 1)) / seq_len, dtype=np.float32)
-            for m in range(factor):
-                tmp = np.array(1 - (np.abs(s - (1+m)) / factor), dtype=np.float32)
-                w = np.power(tmp, 2, dtype=np.float32)
-                W[m, t] = w
-
-        W = torch.tensor(W).float().unsqueeze(0)
-        self.register_buffer("W", W)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        w = self.W.repeat(x.shape[0], 1, 1).requires_grad_(False)
-        u = torch.bmm(w, x)
-        return u.transpose_(1, 2)
-
-
-class ResidualBlock(nn.Module):
-    def __init__(self, layer: nn.Module, embed_dim: int, p=0.1) -> None:
-        super(ResidualBlock, self).__init__()
-        self.layer = layer
-        self.dropout = nn.Dropout(p=p)
-        self.norm = nn.LayerNorm(embed_dim)
-        self.attn_weights = None
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        :param x: [N, seq_len, features]
-        :return: [N, seq_len, features]
-        """
-        if isinstance(self.layer, nn.MultiheadAttention):
-            src = x.transpose(0, 1)     # [seq_len, N, features]
-            output, self.attn_weights = self.layer(src, src, src)
-            output = output.transpose(0, 1)     # [N, seq_len, features]
-
-        else:
-            output = self.layer(x)
-
-        output = self.dropout(output)
-        output = self.norm(x + output)  # old connections concatenated with the output of this layer
-        return output
-
-
-class PositionWiseFeedForward(nn.Module):
-    def __init__(self, hidden_size: int) -> None:
-        super(PositionWiseFeedForward, self).__init__()
-        self.hidden_size = hidden_size
-
-        self.conv = nn.Sequential(
-            nn.Conv1d(hidden_size, hidden_size * 2, 1),
-            nn.ReLU(),
-            nn.Conv1d(hidden_size * 2, hidden_size, 1)
-        )
-
-    def forward(self, tensor: torch.Tensor) -> torch.Tensor:
-        tensor = tensor.transpose(1, 2)
-        tensor = self.conv(tensor)
-        tensor = tensor.transpose(1, 2)
-
-        return tensor
-
-
-class EncoderBlock(nn.Module):
-    def __init__(self, embed_dim: int, num_head: int, dropout_rate=0.1) -> None:
-        super(EncoderBlock, self).__init__()
-        self.attention = ResidualBlock(
-            nn.MultiheadAttention(embed_dim, num_head), embed_dim, p=dropout_rate
-        )
-        self.ffn = ResidualBlock(PositionWiseFeedForward(embed_dim), embed_dim, p=dropout_rate)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.attention(x)
-        x = self.ffn(x)
-        return x
-
-
-class RegressionModule(nn.Module):
-    def __init__(self, d_model: int, factor: int, output_size: int) -> None:
-        super(RegressionModule, self).__init__()
-        self.d_model = d_model
-        self.factor = factor
-        self.output_size = output_size
-        self.fc = nn.Linear(int(d_model * factor), output_size)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x.contiguous().view(-1, int(self.factor * self.d_model))
-        x = self.fc(x)
-        return x
-
-
-class EncoderLayerForSAnD(nn.Module):
-    def __init__(self, input_features, n_heads, n_layers, d_model=128, dropout_rate=0.2) -> None:
-        super(EncoderLayerForSAnD, self).__init__()
-        self.d_model = d_model
-
-        self.input_embedding = nn.Conv1d(input_features, d_model, 1)
-        self.positional_encoding = PositionalEncodingorig(d_model)
-        self.blocks = nn.ModuleList([
-            EncoderBlock(d_model, n_heads, dropout_rate) for _ in range(n_layers)
-        ])
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x.transpose(1, 2)
-        x = self.input_embedding(x)
-        x = x.transpose(1, 2)
-
-        x = self.positional_encoding(x)
-
-        for l in self.blocks:
-            x = l(x)
-
-        return x
-
-
-class SAnD(nn.Module):
-    """
-    Simply Attend and Diagnose model
-    The Thirty-Second AAAI Conference on Artificial Intelligence (AAAI-18)
-    `Attend and Diagnose: Clinical Time Series Analysis Using Attention Models <https://arxiv.org/abs/1711.03905>`_
-    Huan Song, Deepta Rajan, Jayaraman J. Thiagarajan, Andreas Spanias
-    """
-    def __init__(
-            self, input_features: int, seq_len: int, n_heads: int, factor: int,
-            n_class: int, n_layers: int, d_model: int = 128, dropout_rate: float = 0.2
-    ) -> None:
-        super(SAnD, self).__init__()
-        self.encoder = EncoderLayerForSAnD(input_features, n_heads, n_layers, d_model, dropout_rate)
-        self.dense_interpolation = DenseInterpolation(seq_len, factor)
-        self.clf = RegressionModule(d_model, factor, n_class)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.encoder(x)
-        x = self.dense_interpolation(x)
-        x = self.clf(x)
-        return x
