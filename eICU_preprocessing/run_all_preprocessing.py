@@ -7,7 +7,6 @@ import json
 
 with open('paths.json', 'r') as f:
     eICU_path = json.load(f)["eICU_path"]
-    project_directory = json.load(f)["project_directory"]
 
 if __name__=='__main__':
     print('==> Removing the stays.txt file if it exists...')
