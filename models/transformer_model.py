@@ -31,9 +31,10 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, input_size=None, d_model=128, num_layers=4, num_heads=8, feedforward_size=32, dropout=0.3):
+    def __init__(self, input_size=None, d_model=128, num_layers=4, num_heads=8, feedforward_size=32, dropout=0.3, device=None):
         super(TransformerEncoder, self).__init__()
 
+        self.device = device
         self.d_model = d_model
         self.input_embedding = nn.Conv1d(in_channels=input_size, out_channels=d_model, kernel_size=1)  # B * C * T
         self.pos_encoder = PositionalEncoding(d_model)
@@ -43,7 +44,7 @@ class TransformerEncoder(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer=self.trans_encoder_layer, num_layers=num_layers)
 
     def _causal_mask(self, size=None):
-        mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
+        mask = (torch.triu(torch.ones(size, size).to(self.device)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask  # T * T
 
@@ -58,7 +59,7 @@ class TransformerEncoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, config, F=None, D=None, no_flat_features=None):
+    def __init__(self, config, F=None, D=None, no_flat_features=None, device=None):
 
         # The timeseries data will be of dimensions B * (2F + 2) * T where:
         #   B is the batch size
@@ -100,7 +101,7 @@ class Transformer(nn.Module):
         # note if it's bidirectional, then we can't assume there's no influence from future timepoints on past ones
         self.transformer = TransformerEncoder(input_size=(2*self.F + 2), d_model=self.d_model, num_layers=self.n_layers,
                                               num_heads=self.n_heads, feedforward_size=self.feedforward_size,
-                                              dropout=self.trans_dropout_rate)
+                                              dropout=self.trans_dropout_rate, device=device)
 
         # input shape: B * D
         # output shape: B * diagnosis_size

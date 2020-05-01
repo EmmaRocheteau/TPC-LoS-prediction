@@ -12,7 +12,8 @@ class BaselineTransformer(ExperimentTemplate):
         self.model = Transformer(config=self.config,
                                  F=self.train_datareader.F,
                                  D=self.train_datareader.D,
-                                 no_flat_features=self.train_datareader.no_flat_features).to(device=self.device)
+                                 no_flat_features=self.train_datareader.no_flat_features,
+                                 device=self.device).to(device=self.device)
         self.elog.print(self.model)
         self.optimiser = Adam(self.model.parameters(), lr=self.config.learning_rate, weight_decay=self.config.L2_regularisation)
         return

@@ -10,9 +10,9 @@ class TPC(ExperimentTemplate):
     def setup(self):
         self.setup_template()
         self.model = TempPointConv(config=self.config,
-                              F=self.train_datareader.F,
-                              D=self.train_datareader.D,
-                              no_flat_features=self.train_datareader.no_flat_features).to(device=self.device)
+                                   F=self.train_datareader.F,
+                                   D=self.train_datareader.D,
+                                   no_flat_features=self.train_datareader.no_flat_features).to(device=self.device)
         self.elog.print(self.model)
         self.optimiser = Adam(self.model.parameters(), lr=self.config.learning_rate, weight_decay=self.config.L2_regularisation)
         return
