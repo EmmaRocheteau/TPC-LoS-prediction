@@ -1,47 +1,15 @@
 from eICU_preprocessing.split_train_test import create_folder
-from trixi.util import Config
-import argparse
 from models.run_tpc import TPC
+from models.initialise_arguments import initialise_tpc_arguments
+
 
 if __name__=='__main__':
 
-    # not hyperparams
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-disable_cuda', action='store_true')
-    parser.add_argument('--exp_name', default='TPCNoDiagnosis', type=str)
-    parser.add_argument('--n_epochs', default=15, type=int)
-    parser.add_argument('--batch_size_test', default=64, type=int)
-    parser.add_argument('--model_type', default='tpc', type=str)
-    parser.add_argument('-shuffle_train', action='store_true')
-    parser.add_argument('-intermediate_reporting', action='store_true')
-    parser.add_argument('--mode', default='test', type=str)
-    args = parser.parse_args()
-
-    # prepare config dictionary, add all arguments from args
-    c = Config()
-    for arg in vars(args):
-        c[arg] = getattr(args, arg)
-
-    c['loss'] = 'msle'
-    c['diagnosis_size'] = 64
-    c['last_linear_size'] = 17
-    c['batchnorm'] = 'mybatchnorm'
-    c['main_dropout_rate'] = 0.45
-    c['L2_regularisation'] = 0
-    c['n_layers'] = 9
-    c['kernel_size'] = 4
-    c['temp_kernels'] = [12]*c['n_layers']
-    c['point_sizes'] = [13]*c['n_layers']
-    c['learning_rate'] = 0.00226
-    c['batch_size'] = 32
-    c['temp_dropout_rate'] = 0.05
-    c['sum_losses'] = True
-    c['share_weights'] = False
-    c['labs_only'] = False
-    c['no_labs'] = False
+    c = initialise_tpc_arguments()
+    c['mode'] = 'test'
+    c['exp_name'] = 'TPCNoDiagnosis'
+    c['model_type'] = 'tpc'
     c['no_diag'] = True
-    c['no_mask'] = False
-    c['no_exp'] = False
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
     tpc = TPC(config=c,

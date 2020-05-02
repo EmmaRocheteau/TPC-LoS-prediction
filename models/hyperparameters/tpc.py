@@ -1,30 +1,18 @@
 from eICU_preprocessing.split_train_test import create_folder
-from trixi.util import Config
-import argparse
 from models.run_tpc import TPC
 import numpy as np
 import random
+from models.initialise_arguments import initialise_tpc_arguments
+
 
 if __name__=='__main__':
 
-    # not hyperparams
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-disable_cuda', action='store_true')
-    parser.add_argument('--exp_name', default='TPC', type=str)
-    parser.add_argument('--n_epochs', default=25, type=int)
-    parser.add_argument('--batch_size_test', default=64, type=int)
-    parser.add_argument('--model_type', default='tpc', type=str)
-    parser.add_argument('-shuffle_train', action='store_true')
-    parser.add_argument('-intermediate_reporting', action='store_true')
-    parser.add_argument('--mode', default='train', type=str)
-    args = parser.parse_args()
+    c = initialise_tpc_arguments()
+    c['mode'] = 'train'
+    c['exp_name'] = 'TPC'
+    c['model_type'] = 'tpc'
 
-    # prepare config dictionary, add all arguments from args
-    c = Config()
-    for arg in vars(args):
-        c[arg] = getattr(args, arg)
-
-    # Hyperparameter grid
+    # hyper-parameter grid
     param_grid = {
         'n_layers': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
         'temp_kernels': list(int(x) for x in np.logspace(np.log2(4), np.log2(16), base=2, num=16)),
@@ -50,8 +38,6 @@ if __name__=='__main__':
                         12: [3, 4]}
     }
 
-    c['loss'] = 'msle'
-    c['L2_regularisation'] = 0
     c['n_layers'] = random.choice(param_grid['n_layers'])
     c['kernel_size'] = random.choice(param_grid['kernel_size'][c['n_layers']])
     c['temp_kernels'] = [random.choice(param_grid['temp_kernels'])]*c['n_layers']
@@ -63,13 +49,6 @@ if __name__=='__main__':
     c['temp_dropout_rate'] = random.choice(param_grid['temp_dropout_rate'])
     c['last_linear_size'] = random.choice(param_grid['last_linear_size'])
     c['diagnosis_size'] = random.choice(param_grid['diagnosis_size'])
-    c['sum_losses'] = True
-    c['share_weights'] = False
-    c['labs_only'] = False
-    c['no_labs'] = False
-    c['no_diag'] = False
-    c['no_mask'] = False
-    c['no_exp'] = False
 
     log_folder_path = create_folder('models/experiments/hyperparameters', c.exp_name)
     tpc = TPC(config=c,
