@@ -2,7 +2,7 @@ eICU Length of Stay Prediction
 ===============================
 
 This repository contains the code used for Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit.
-
+ 
 ## Citation
 If you use this code or the models in your research, please cite the following publication:
 
@@ -23,7 +23,7 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 
 2) Follow the instructions: https://eicu-crd.mit.edu/tutorials/install_eicu_locally/ to ensure the correct connection configuration. 
 
-3) Replace the eICU_path in paths.json and `create_all_tables.sql` using find and replace for 
+3) Replace the eICU_path in `paths.json` to a convenient location in your computer and `create_all_tables.sql` using find and replace for 
 `'/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'` so that they run on your local computer.
 
 4) In your terminal:

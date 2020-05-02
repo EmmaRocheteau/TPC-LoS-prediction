@@ -1,12 +1,10 @@
 -- creates all the tables and produces csv files
--- takes a few minutes to run
+-- takes a while to run (about an hour)
 
--- do a find and replace for '/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction' to whatever the path is to your folder
-
-\i /Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_preprocessing/labels.sql
-\i /Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_preprocessing/diagnoses.sql
-\i /Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_preprocessing/flat_features.sql
-\i /Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_preprocessing/timeseries.sql
+\i eICU_preprocessing/labels.sql
+\i eICU_preprocessing/diagnoses.sql
+\i eICU_preprocessing/flat_features.sql
+\i eICU_preprocessing/timeseries.sql
 
 -- we need to make sure that we have at least some form of time series for every patient in diagnoses, flat and labels
 drop materialized view if exists ld_timeseries_patients cascade;
