@@ -7,7 +7,7 @@ def initialise_arguments():
     # general
     parser.add_argument('-disable_cuda', action='store_true')
     parser.add_argument('-intermediate_reporting', action='store_true')
-    parser.add_argument('--batch_size_test', default=128, type=int)
+    parser.add_argument('--batch_size_test', default=64, type=int)
     parser.add_argument('-shuffle_train', action='store_true')
 
     # loss
