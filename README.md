@@ -26,7 +26,7 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 3) Replace the eICU_path in `paths.json` to a convenient location in your computer and `create_all_tables.sql` using find and replace for 
 `'/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'` so that they run on your local computer.
 
-4) In your terminal:
+4) In your terminal, navigate to the project directory, then type the following commands:
 
     ```
     psql 'dbname=eicu user=eicu options=--search_path=eicu'
@@ -35,7 +35,7 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
     Inside the psql console:
     
     ```
-    \i {path_to_repository}/eICU_preprocessing/create_all_tables.sql
+    \i eICU_preprocessing/create_all_tables.sql
     ```
     
     To quit the psql console:

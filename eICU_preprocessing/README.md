@@ -9,7 +9,7 @@ eICU Preprocessing
 3) Replace the eICU_paths in `create_all_tables.sql` and `run_all_preprocessing.py` using find and replace for 
 `'/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'` so that they run on your local computer.
 
-4) In your terminal:
+4) In your terminal, navigate to the project directory, then type the following commands:
 
     ```
     psql 'dbname=eicu user=eicu options=--search_path=eicu'
