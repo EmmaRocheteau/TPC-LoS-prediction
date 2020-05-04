@@ -1,6 +1,9 @@
 -- creates all the tables and produces csv files
 -- takes a while to run (about an hour)
 
+-- change the paths to those in your local computer using find and replace for '/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'.
+-- keep the file names the same
+
 \i eICU_preprocessing/labels.sql
 \i eICU_preprocessing/diagnoses.sql
 \i eICU_preprocessing/flat_features.sql

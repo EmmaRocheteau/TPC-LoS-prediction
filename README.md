@@ -23,8 +23,8 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 
 2) Follow the instructions: https://eicu-crd.mit.edu/tutorials/install_eicu_locally/ to ensure the correct connection configuration. 
 
-3) Replace the eICU_path in `paths.json` to a convenient location in your computer and `create_all_tables.sql` using find and replace for 
-`'/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'` so that they run on your local computer.
+3) Replace the eICU_path in `paths.json` to a convenient location in your computer, and do the same for `eICU_preprocessing/create_all_tables.sql` using find and replace for 
+`'/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/'`. Leave the extra '/' at the end.
 
 4) In your terminal, navigate to the project directory, then type the following commands:
 
@@ -47,7 +47,7 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 5) Then run the pre-processing scripts in your terminal. This will need to run overnight:
 
     ```
-    python {path_to_repository}/eICU_preprocessing/run_all_preprocessing.py
+    python eICU_preprocessing/run_all_preprocessing.py
     ```
    
 ### Running the models
@@ -70,17 +70,17 @@ benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Mem
 2) The hyperparameter searches can be replicated by running:
 
     ```
-    python -m models.hyperparameters.tpc
+    python -m models.hyperparameter_scripts.tpc
     ```
  
     Trixi provides a useful way to visualise effects of the hyperparameters (after running the following command, navigate to http://localhost:8080 in your browser):
     
     ```
-    python -m trixi.browser --port 8080 models/hyperparameters/TPC
+    python -m trixi.browser --port 8080 experiments/hyperparameters/TPC
     ```
     
-    The final experiments for the paper are found in models/scripts:
+    The final experiments for the paper are found in models/final_experiment_scripts:
     
     ```
-    python -m models.scripts.tpc
+    python -m models.final_experiment_scripts.tpc
     ```
