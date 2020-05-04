@@ -16,7 +16,7 @@ if __name__=='__main__':
         'n_layers': [1, 2, 3, 4],
         'learning_rate': list(np.logspace(np.log10(0.0001), np.log10(0.01), base=10, num=100)),
         'batch_size': list(int(x) for x in np.logspace(np.log2(4), np.log2(512), base=2, num=8)),
-        'lstm_dropout_rate': [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+        'lstm_dropout_rate': [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5],
         'hidden_size': list(int(x) for x in np.logspace(np.log2(16), np.log2(256), base=2, num=5)),
     }
 
