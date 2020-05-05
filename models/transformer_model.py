@@ -31,7 +31,7 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, input_size=None, d_model=128, num_layers=4, num_heads=8, feedforward_size=32, dropout=0.3,
+    def __init__(self, input_size=None, d_model=None, num_layers=None, num_heads=None, feedforward_size=None, dropout=None,
                  pe=None, device=None):
         super(TransformerEncoder, self).__init__()
 

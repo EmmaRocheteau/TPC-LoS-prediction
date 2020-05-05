@@ -28,7 +28,7 @@ if __name__=='__main__':
                                  n_epochs=c.n_epochs,
                                  name=c.exp_name,
                                  base_dir=log_folder_path,
-                                 explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S'})
+                                 explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
     if c.mode == 'train':
         baseline_lstm.run()
     if c.mode == 'test':
