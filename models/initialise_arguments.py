@@ -9,6 +9,7 @@ def initialise_arguments():
     parser.add_argument('-intermediate_reporting', action='store_true')
     parser.add_argument('--batch_size_test', default=64, type=int)
     parser.add_argument('-shuffle_train', action='store_true')
+    parser.add_argument('save_results', action='store_true')
 
     # loss
     parser.add_argument('--loss', default='msle', type=str, help='can either be msle or mse')

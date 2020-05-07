@@ -116,16 +116,16 @@ class ExperimentTemplate(PytorchExperiment):
                 self.add_result(value=metric, name='train_' + metric_name, counter=epoch)
             self.elog.print('Epoch: {} | Train Loss: {:3.4f}'.format(epoch, mean_train_loss))
 
-
-            if epoch == self.n_epochs - 1:
-                self.save_checkpoint(name='checkpoint', n_iter=epoch)
-                if self.config.mode == 'train':
-                    self.elog.save_to_csv(np.vstack((train_y_hat, train_y)).transpose(),
-                                          'train_predictions/epoch{}.csv'.format(epoch),
-                                          header='predictions, label')
-
         if self.config.mode == 'test':
             print('Done epoch {}'.format(epoch))
+
+        if epoch == self.n_epochs - 1:
+            if self.mode == 'train':
+                self.save_checkpoint(name='checkpoint', n_iter=epoch)
+            if self.config.save_results_csv:
+                self.elog.save_to_csv(np.vstack((train_y_hat, train_y)).transpose(),
+                                      'train_predictions/epoch{}.csv'.format(epoch),
+                                      header='predictions, label')
 
         return
 
@@ -158,13 +158,13 @@ class ExperimentTemplate(PytorchExperiment):
                 self.add_result(value=metric, name='val_' + metric_name, counter=epoch)
             self.elog.print('Epoch: {} | Validation Loss: {:3.4f}'.format(epoch, mean_val_loss))
 
-            if epoch == self.n_epochs - 1:
-                self.elog.save_to_csv(np.vstack((val_y_hat, val_y)).transpose(),
-                                      'val_predictions/epoch{}.csv'.format(epoch),
-                                      header='predictions, label')
-
         elif self.config.mode == 'test' and epoch == self.n_epochs - 1:
             self.test()
+
+        if epoch == self.n_epochs - 1 and self.config.save_results_csv:
+            self.elog.save_to_csv(np.vstack((val_y_hat, val_y)).transpose(),
+                                  'val_predictions/epoch{}.csv'.format(epoch),
+                                  header='predictions, label')
 
         return
 
