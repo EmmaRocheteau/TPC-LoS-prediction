@@ -72,13 +72,13 @@ def initialise_lstm_arguments():
 def initialise_transformer_arguments():
     parser = initialise_arguments()
     parser.add_argument('--n_epochs', default=15, type=int)
-    parser.add_argument('--batch_size', default=16, type=int)
-    parser.add_argument('--n_layers', default=4, type=int)
+    parser.add_argument('--batch_size', default=32, type=int)
+    parser.add_argument('--n_layers', default=6, type=int)
     parser.add_argument('--feedforward_size', default=256, type=int)
-    parser.add_argument('--d_model', default=128, type=int)
+    parser.add_argument('--d_model', default=16, type=int)
     parser.add_argument('--n_heads', default=2, type=int)
-    parser.add_argument('--learning_rate', default=0.00016, type=float)
-    parser.add_argument('--trans_dropout_rate', default=0.5, type=float)
-    parser.add_argument('-positional_encoding', action='store_true')
+    parser.add_argument('--learning_rate', default=0.00017, type=float)
+    parser.add_argument('--trans_dropout_rate', default=0, type=float)
+    parser.add_argument('-positional_encoding', action='store_true')  # default is False
     c = gen_config(parser)
     return c
