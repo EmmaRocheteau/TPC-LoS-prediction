@@ -3,6 +3,7 @@ from torch.optim import Adam
 from models.tpc_model import TempPointConv
 from models.experiment_template import ExperimentTemplate
 from models.initialise_arguments import initialise_tpc_arguments
+from models.count_parameters import count_parameters
 
 
 class TPC(ExperimentTemplate):
@@ -31,6 +32,10 @@ if __name__=='__main__':
               name=c.exp_name,
               base_dir=log_folder_path,
               explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
+
+#    tpc.setup()
+#    print('Parameter Count: {}'.format(count_parameters(tpc.model)))
+
     if c.mode == 'train':
         tpc.run()
     if c.mode == 'test':

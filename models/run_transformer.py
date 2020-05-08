@@ -3,6 +3,7 @@ from torch.optim import Adam
 from models.transformer_model import Transformer
 from models.experiment_template import ExperimentTemplate
 from models.initialise_arguments import initialise_transformer_arguments
+from models.count_parameters import count_parameters
 
 
 class BaselineTransformer(ExperimentTemplate):
@@ -30,6 +31,10 @@ if __name__=='__main__':
                                                name=c.exp_name,
                                                base_dir=log_folder_path,
                                                explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
+
+#    baseline_transformer.setup()
+#    print('Parameter Count: {}'.format(count_parameters(baseline_transformer.model)))
+
     if c.mode == 'train':
         baseline_transformer.run()
     if c.mode == 'test':
