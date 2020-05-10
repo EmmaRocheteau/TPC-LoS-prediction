@@ -5,6 +5,7 @@ def initialise_arguments():
     parser = argparse.ArgumentParser()
 
     # general
+    parser.add_argument('--exp_name', default='Unspecified', type='str')
     parser.add_argument('-disable_cuda', action='store_true')
     parser.add_argument('-intermediate_reporting', action='store_true')
     parser.add_argument('--batch_size_test', default=64, type=int)
