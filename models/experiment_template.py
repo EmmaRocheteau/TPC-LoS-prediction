@@ -84,6 +84,9 @@ class ExperimentTemplate(PytorchExperiment):
 
         for batch_idx, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(train_batches):
 
+            if batch_idx > (self.no_train_batches // (100 / self.config.percentage_data)):
+                break
+
             self.optimiser.zero_grad()
             y_hat = self.model(padded, diagnoses, flat)
             loss = self.model.loss(y_hat, labels, mask, seq_lengths, self.device, self.config.sum_losses, self.config.loss)
