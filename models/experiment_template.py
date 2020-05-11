@@ -123,7 +123,7 @@ class ExperimentTemplate(PytorchExperiment):
             print('Done epoch {}'.format(epoch))
 
         if epoch == self.n_epochs - 1:
-            if self.mode == 'train':
+            if self.config.mode == 'train':
                 self.save_checkpoint(name='checkpoint', n_iter=epoch)
             if self.config.save_results_csv:
                 self.elog.save_to_csv(np.vstack((train_y_hat, train_y)).transpose(),
