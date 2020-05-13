@@ -9,7 +9,7 @@ if __name__=='__main__':
     c['mode'] = 'test'
     c['exp_name'] = 'Transformer12.5'
     c['percentage_data'] = 12.5
-    c['n_epochs'] = 120
+    c['n_epochs'] = 10
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
     transformer = BaselineTransformer(config=c,

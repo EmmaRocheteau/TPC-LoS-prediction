@@ -9,7 +9,7 @@ if __name__=='__main__':
     c['mode'] = 'test'
     c['exp_name'] = 'StandardLSTM12.5'
     c['percentage_data'] = 12.5
-    c['n_epochs'] = 240
+    c['n_epochs'] = 4
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
     baseline_lstm = BaselineLSTM(config=c,
