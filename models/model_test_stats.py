@@ -13,11 +13,11 @@ def swapPositions(list, pos1, pos2):
     list[pos1], list[pos2] = list[pos2], list[pos1]
     return list
 
-exp_dir = 'ChannelwiseLSTMNoLabsrepeats'
+exp_dir = 'TransformerNoLabs'
 
 print('Experiment: {}'.format(exp_dir))
 
-stats = pd.read_csv('models/' + exp_dir + '/results.csv', header=None)
+stats = pd.read_csv('models/experiments/final/' + exp_dir + '/results.csv', header=None)
 stats.columns =['mad', 'mse', 'mape', 'msle', 'r2', 'kappa']
 print('There are {} experiments done here'.format(len(stats)))
 print('Discarding the first {}'.format(len(stats) - 10))
