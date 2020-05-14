@@ -399,11 +399,7 @@ class TempPointConv(nn.Module):
                 if self.no_mask:
                     next_X = X_separated[0]
                 else:
-                    print(torch.stack(X_separated, dim=2).shape)
-                    print(B)
-                    print(self.F)
-                    print(T)
-                    next_X = torch.stack(X_separated, dim=2).view(B, 2 * self.F, 1, T).unsqueeze()  # B * 2F * T
+                    next_X = torch.stack(X_separated, dim=2).reshape(B, 2 * self.F, T)  # B * 2F * T
                 point_skip = X_separated[0]  # keeps track of skip connections generated from linear layers; B * F * T
                 temp_output = None
                 point_output = None
