@@ -191,9 +191,8 @@ class ExperimentTemplate(PytorchExperiment):
         print('Test Metrics:')
         mean_test_loss = sum(test_loss) / len(test_loss)
         metrics_list = print_metrics_regression(test_y, test_y_hat, elog=self.elog)  # order: mad, mse, mape, msle, r2, kappa
-        self.elog.save_to_csv(np.vstack((test_y_hat, test_y)).transpose(),
-                              'test_predictions.csv',
-                              header='predictions, label')
+        if self.config.save_results_csv:
+            self.elog.save_to_csv(np.vstack((test_y_hat, test_y)).transpose(), 'test_predictions.csv', header='predictions, label')
         for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], metrics_list):
             self.add_result(value=metric, name='test_' + metric_name)
         self.elog.print('Test Loss: {:3.4f}'.format(mean_test_loss))
