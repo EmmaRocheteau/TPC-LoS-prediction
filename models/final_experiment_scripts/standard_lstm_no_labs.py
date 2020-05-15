@@ -25,9 +25,11 @@ if __name__=='__main__':
     c['no_labs'] = True
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
-    baseline_lstm = BaselineLSTM(config=c,
+
+    for i in range(5):
+        baseline_lstm = BaselineLSTM(config=c,
                                  n_epochs=c.n_epochs,
                                  name=c.exp_name,
                                  base_dir=log_folder_path,
                                  explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
-    baseline_lstm.run()
+        baseline_lstm.run()
