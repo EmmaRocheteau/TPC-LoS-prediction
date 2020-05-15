@@ -59,7 +59,7 @@ def initialise_tpc_arguments():
 
 def initialise_lstm_arguments():
     parser = initialise_arguments()
-    parser.add_argument('--n_epochs', default=30, type=int)
+    parser.add_argument('--n_epochs', default=8, type=int)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--n_layers', default=2, type=int)
     parser.add_argument('--hidden_size', default=128, type=int)
