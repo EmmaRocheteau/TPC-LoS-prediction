@@ -24,6 +24,7 @@ if __name__=='__main__':
     c['exp_name'] = 'ChannelwiseLSTMNoLabs'
     c['channelwise'] = True
     c['hidden_size'] = 8
+    c['n_epochs'] = 30
     c['no_labs'] = True
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)

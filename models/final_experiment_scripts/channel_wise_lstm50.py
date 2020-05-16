@@ -11,7 +11,7 @@ if __name__=='__main__':
     c['channelwise'] = True
     c['hidden_size'] = 8
     c['percentage_data'] = 50
-    c['n_epochs'] = 6
+    c['n_epochs'] = 30
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
     channelwise_lstm = BaselineLSTM(config=c,
