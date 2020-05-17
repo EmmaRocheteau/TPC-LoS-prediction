@@ -11,7 +11,6 @@ if __name__=='__main__':
     c['model_type'] = 'tpc'
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
-
     tpc = TPC(config=c,
               n_epochs=c.n_epochs,
               name=c.exp_name,

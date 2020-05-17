@@ -13,7 +13,7 @@ def swapPositions(list, pos1, pos2):
     list[pos1], list[pos2] = list[pos2], list[pos1]
     return list
 
-exp_dir = 'TPC6.25'
+exp_dir = 'StandardLSTMLabsOnly'
 
 print('Experiment: {}'.format(exp_dir))
 
