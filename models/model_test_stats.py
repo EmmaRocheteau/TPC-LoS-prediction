@@ -13,7 +13,7 @@ def swapPositions(list, pos1, pos2):
     list[pos1], list[pos2] = list[pos2], list[pos1]
     return list
 
-exp_dir = 'StandardLSTMLabsOnly'
+exp_dir = 'ChannelwiseLSTM6.25'
 
 print('Experiment: {}'.format(exp_dir))
 
