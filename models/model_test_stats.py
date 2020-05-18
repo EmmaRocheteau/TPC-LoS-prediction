@@ -13,32 +13,35 @@ def swapPositions(list, pos1, pos2):
     list[pos1], list[pos2] = list[pos2], list[pos1]
     return list
 
-exp_dir = 'ChannelwiseLSTM6.25'
+def main(exp_dir):
+    print('Experiment: {}'.format(exp_dir))
+    stats = pd.read_csv('models/experiments/final/' + exp_dir + '/results.csv', header=None)
+    stats.columns =['mad', 'mse', 'mape', 'msle', 'r2', 'kappa']
+    print('There are {} experiments done here'.format(len(stats)))
+    print('Discarding the first {}'.format(len(stats) - 10))
+    stats = stats[-10:]
 
-print('Experiment: {}'.format(exp_dir))
+    mean_all, conf_bound = mean_confidence_interval(stats)
+    mean_all = swapPositions(mean_all, 1, 2)
+    conf_bound = swapPositions(conf_bound, 1, 2)
 
-stats = pd.read_csv('models/experiments/final/' + exp_dir + '/results.csv', header=None)
-stats.columns =['mad', 'mse', 'mape', 'msle', 'r2', 'kappa']
-print('There are {} experiments done here'.format(len(stats)))
-print('Discarding the first {}'.format(len(stats) - 10))
-stats = stats[-10:]
+    for i, (m, cb) in enumerate(zip(mean_all, conf_bound)):
+        if i == 0:
+            m = str(np.round(m, 2)).ljust(4, '0')
+            cb = str(np.round(cb, 2)).ljust(4, '0')
+        elif i in [1, 2]:
+            m = str(np.round(m, 1)).ljust(4, '0')
+            cb = str(np.round(cb, 1)).ljust(3, '0')
+    #    else:
+    #        m = str(np.round(m, 3)).ljust(5, '0')
+    #        cb = str(np.round(cb, 3)).ljust(5, '0')
+        else:
+            m = str(np.round(m, 2)).ljust(4, '0')
+            cb = str(np.round(cb, 2)).ljust(4, '0')
+        and_space = ' & ' if i < 5 else ' \\\\'
+        print('\\footnotesize{}{}$\pm${}{}{}'.format('{', m, cb, '}', and_space), end='', flush=True)
+    return
 
-mean_all, conf_bound = mean_confidence_interval(stats)
-mean_all = swapPositions(mean_all, 1, 2)
-conf_bound = swapPositions(conf_bound, 1, 2)
-
-for i, (m, cb) in enumerate(zip(mean_all, conf_bound)):
-    if i == 0:
-        m = str(np.round(m, 2)).ljust(4, '0')
-        cb = str(np.round(cb, 2)).ljust(4, '0')
-    elif i in [1, 2]:
-        m = str(np.round(m, 1)).ljust(4, '0')
-        cb = str(np.round(cb, 1)).ljust(3, '0')
-#    else:
-#        m = str(np.round(m, 3)).ljust(5, '0')
-#        cb = str(np.round(cb, 3)).ljust(5, '0')
-    else:
-        m = str(np.round(m, 2)).ljust(4, '0')
-        cb = str(np.round(cb, 2)).ljust(4, '0')
-    and_space = ' & ' if i < 5 else ' \\\\'
-    print('\\footnotesize{}{}$\pm${}{}{}'.format('{', m, cb, '}', and_space), end='', flush=True)
+if __name__=='__main__':
+    exp_dir = 'ChannelwiseLSTM25'
+    main(exp_dir)
