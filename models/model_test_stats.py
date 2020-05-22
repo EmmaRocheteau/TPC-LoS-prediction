@@ -43,5 +43,5 @@ def main(exp_dir):
     return
 
 if __name__=='__main__':
-    exp_dir = 'ChannelwiseLSTM25'
+    exp_dir = 'ChannelwiseLSTMMSE'
     main(exp_dir)

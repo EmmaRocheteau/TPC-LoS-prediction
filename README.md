@@ -17,7 +17,6 @@ domain-specific approach. We specifically design the model to mitigate for commo
 Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance 
 benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
 
-## Running the models
 ### eICU Pre-processing
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
 
