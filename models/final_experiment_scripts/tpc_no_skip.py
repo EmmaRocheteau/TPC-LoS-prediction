@@ -7,7 +7,7 @@ if __name__=='__main__':
 
     c = initialise_tpc_arguments()
     c['mode'] = 'test'
-    c['exp_name'] = 'TPC'
+    c['exp_name'] = 'TPCNoSkip'
     c['model_type'] = 'tpc'
     c['no_skip_connections'] = True
 
