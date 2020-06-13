@@ -52,6 +52,7 @@ def initialise_tpc_arguments():
     parser.add_argument('--learning_rate', default=0.00226, type=float)
     parser.add_argument('--temp_dropout_rate', default=0.05, type=float)
     parser.add_argument('-share_weights', action='store_true')
+    parser.add_argument('-no_skip_connections', action='store_true')
     c = gen_config(parser)
     c['temp_kernels'] = [c['no_temp_kernels']]*c['n_layers']
     c['point_sizes'] = [c['point_size']]*c['n_layers']

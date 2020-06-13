@@ -13,7 +13,7 @@ if __name__=='__main__':
 
     # hyper-parameter grid
     param_grid = {
-        'n_layers': [1, 2, 3, 4, 5, 6],
+        'n_layers': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         'learning_rate': list(np.logspace(np.log10(0.0001), np.log10(0.01), base=10, num=100)),
         'batch_size': list(int(x) for x in np.logspace(np.log2(4), np.log2(512), base=2, num=8)),
         'trans_dropout_rate': [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5],

@@ -102,7 +102,6 @@ class Transformer(nn.Module):
         self.empty_module = EmptyModule()
         self.remove_none = lambda x: tuple(xi for xi in x if xi is not None)
 
-        # note if it's bidirectional, then we can't assume there's no influence from future timepoints on past ones
         self.transformer = TransformerEncoder(input_size=(2*self.F + 2), d_model=self.d_model, num_layers=self.n_layers,
                                               num_heads=self.n_heads, feedforward_size=self.feedforward_size,
                                               dropout=self.trans_dropout_rate, pe=self.positional_encoding,

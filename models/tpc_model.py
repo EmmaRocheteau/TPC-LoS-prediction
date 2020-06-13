@@ -117,6 +117,7 @@ class TempPointConv(nn.Module):
         self.no_diag = config.no_diag
         self.no_mask = config.no_mask
         self.no_exp = config.no_exp
+        self.no_skip_connections = config.no_skip_connections
         self.momentum = 0.01 if self.batchnorm == 'low_momentum' else 0.1
 
         self.relu = nn.ReLU()
@@ -179,6 +180,8 @@ class TempPointConv(nn.Module):
         input_size = (self.F + self.Zt) * (1 + self.Y) + self.diagnosis_size + self.no_flat_features
         if self.no_diag:
             input_size = input_size - self.diagnosis_size
+        if self.no_skip_connections:
+            input_size = self.F * self.Y + self.Z + self.diagnosis_size + self.no_flat_features
         self.point_last = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
 
         return
@@ -275,6 +278,20 @@ class TempPointConv(nn.Module):
                              groups=self.F + self.Zt)
 
             point = nn.Linear(in_features=linear_input_dim, out_features=linear_output_dim)
+
+            # correct if no_skip_connections
+            if self.no_skip_connections:
+                temp_in_channels = self.F * self.Y if i > 0 else 2 * self.F  # F * Y
+                temp_out_channels = self.F * self.layers[i]['temp_kernels']  # F * temp_kernels
+                linear_input_dim = self.F * self.Y + self.Z if i > 0 else 2 * self.F + 2 + self.no_flat_features  # (F * Y) + Z
+                temp = nn.Conv1d(in_channels=temp_in_channels,
+                                 out_channels=temp_out_channels,
+                                 kernel_size=self.kernel_size,
+                                 stride=self.layers[i]['stride'],
+                                 dilation=self.layers[i]['dilation'],
+                                 groups=self.F)
+
+                point = nn.Linear(in_features=linear_input_dim, out_features=linear_output_dim)
 
             if self.batchnorm in ['default', 'mybatchnorm', 'low_momentum']:
                 bn_temp = self.batchnormclass(num_features=temp_out_channels, momentum=self.momentum)
@@ -403,7 +420,7 @@ class TempPointConv(nn.Module):
                 point_skip = X_separated[0]  # keeps track of skip connections generated from linear layers; B * F * T
                 temp_output = None
                 point_output = None
-            else:
+            else:  # pointwise only
                 next_X = X_orig
                 point_skip = None
         elif self.model_type == 'temp_only':
@@ -413,22 +430,42 @@ class TempPointConv(nn.Module):
                            'B': B,
                            'T': T}
 
+        if self.no_skip_connections:
+            temp_output = next_X
+            point_output = cat((X_orig,  # (B * T) * (2F + 2)
+                                repeat_flat),  # (B * T) * no_flat_features
+                               dim=1)  # (B * T) * (2F + 2 + no_flat_features)
+            self.layer1 = True
+
         for i in range(self.n_layers):
             kwargs = dict(self.layer_modules[str(i)], **repeat_args)
             if self.model_type == 'tpc':
-                temp_output, point_output, next_X, point_skip = self.temp_pointwise(X=next_X, point_skip=point_skip,
-                                                                         prev_temp=temp_output, prev_point=point_output,
-                                                                         temp_kernels=self.layers[i]['temp_kernels'],
-                                                                         padding=self.layers[i]['padding'],
-                                                                         point_size=self.layers[i]['point_size'],
-                                                                         **kwargs)
+                if self.no_skip_connections:
+                    temp_output, point_output = self.temp_pointwise_no_skip(prev_point=point_output, prev_temp=temp_output,
+                                                                            temp_kernels=self.layers[i]['temp_kernels'],
+                                                                            padding=self.layers[i]['padding'], **kwargs)
+
+                else:
+                    temp_output, point_output, next_X, point_skip = self.temp_pointwise(X=next_X, point_skip=point_skip,
+                                                                        prev_temp=temp_output, prev_point=point_output,
+                                                                        temp_kernels=self.layers[i]['temp_kernels'],
+                                                                        padding=self.layers[i]['padding'],
+                                                                        point_size=self.layers[i]['point_size'],
+                                                                        **kwargs)
             elif self.model_type == 'temp_only':
                 next_X = self.temp(X=next_X, temp_kernels=self.layers[i]['temp_kernels'],
                                    padding=self.layers[i]['padding'], **kwargs)
             elif self.model_type == 'pointwise_only':
                 next_X, point_skip = self.point(X=next_X, point_skip=point_skip, **kwargs)
 
+        # tidy up
         if self.model_type == 'pointwise_only':
+            next_X = next_X.view(B, T, -1).permute(0, 2, 1)
+        elif self.no_skip_connections:
+            # combine the final layer
+            next_X = cat((point_output,
+                          temp_output.permute(0, 2, 1).contiguous().view(B * T, self.F * self.layers[-1]['temp_kernels'])),
+                         dim=1)
             next_X = next_X.view(B, T, -1).permute(0, 2, 1)
 
         # note that we cut off at 5 hours here because the model is only valid from 5 hours onwards
@@ -452,7 +489,8 @@ class TempPointConv(nn.Module):
 
 
     def temp_pointwise(self, B=None, T=None, X=None, repeat_flat=None, X_orig=None, temp=None, bn_temp=None, point=None,
-                  bn_point=None, temp_kernels=None, point_size=None, padding=None, prev_temp=None, prev_point=None, point_skip=None):
+                       bn_point=None, temp_kernels=None, point_size=None, padding=None, prev_temp=None, prev_point=None,
+                       point_skip=None):
 
         ### Notation used for tracking the tensor shapes ###
 
@@ -551,12 +589,40 @@ class TempPointConv(nn.Module):
         # X_orig: (B * T) * (2F + 2)
         # repeat_flat: (B * T) * no_flat_features
         # next_X: (B * T) * (Zt + 2F + 2 + no_flat_features)
-        next_X = cat((point_skip.permute(0, 2, 1).contiguous().view(B * T, -1), X_orig), dim=1)
-
-        # combine step should happen here so it's there at the end
+        next_X = self.relu(cat((point_skip.permute(0, 2, 1).contiguous().view(B * T, -1), X_orig), dim=1))
 
         return (next_X,  # (B * T) * (Zt + 2F + 2 + no_flat_features)
                 point_skip)  # for keeping track of the pointwise skip connections; B * Zt * T
+
+    def temp_pointwise_no_skip(self, B=None, T=None, temp=None, bn_temp=None, point=None, bn_point=None, padding=None, prev_temp=None,
+                               prev_point=None, temp_kernels=None, X_orig=None, repeat_flat=None):
+
+        ### Temporal component ###
+
+        # Y is the number of channels in the previous temporal layer (could be 0 if this is the first layer)
+        # prev_temp shape: B * (F * Y) * T; N.B exception in the first layer where there are also mask features, in this case it is B * 2F * T
+
+        X_padded = pad(prev_temp, padding, 'constant', 0)  # B * (F * Y) * (T + padding)
+        temp_output = self.relu(self.temp_dropout(bn_temp(temp(X_padded))))  # B * (F * temp_kernels) * T
+
+        ### Pointwise component ###
+
+        # Z is the number of extra features added by the previous pointwise layer (if it is layer 1 it is 2F + 2 + no_flat_features)
+        # prev_point shape: (B * T) * ((F * Y) + Z)
+
+        # if this is not layer 1:
+        if self.layer1:
+            X_concat = prev_point
+            self.layer1 = False
+        else:
+            X_concat = cat((prev_point,
+                            prev_temp.permute(0, 2, 1).contiguous().view(B * T, self.F * temp_kernels)),
+                           dim=1)
+
+        point_output = self.relu(self.main_dropout(bn_point(point(X_concat))))  # (B * T) * point_size
+
+        return (temp_output,  # B * (F * temp_kernels) * T
+                point_output)  # (B * T) * point_size
 
 
     def loss(self, y_hat, y, mask, seq_lengths, device, sum_losses, loss_type):
