@@ -13,10 +13,9 @@ if __name__=='__main__':
 
     log_folder_path = create_folder('models/experiments/final', c.exp_name)
 
-    for i in range(5):
-        tpc = TPC(config=c,
-                  n_epochs=c.n_epochs,
-                  name=c.exp_name,
-                  base_dir=log_folder_path,
-                  explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
-        tpc.run()
+    tpc = TPC(config=c,
+              n_epochs=c.n_epochs,
+              name=c.exp_name,
+              base_dir=log_folder_path,
+              explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
+    tpc.run()
