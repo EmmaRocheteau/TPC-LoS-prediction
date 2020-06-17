@@ -283,7 +283,8 @@ class TempPointConv(nn.Module):
             if self.no_skip_connections:
                 temp_in_channels = self.F * self.Y if i > 0 else 2 * self.F  # F * Y
                 temp_out_channels = self.F * self.layers[i]['temp_kernels']  # F * temp_kernels
-                linear_input_dim = self.F * self.Y + self.Z if i > 0 else 2 * self.F + 2 + self.no_flat_features  # (F * Y) + Z
+                #linear_input_dim = self.F * self.Y + self.Z if i > 0 else 2 * self.F + 2 + self.no_flat_features  # (F * Y) + Z
+                linear_input_dim = self.Z if i > 0 else 2 * self.F + 2 + self.no_flat_features  # Z
                 temp = nn.Conv1d(in_channels=temp_in_channels,
                                  out_channels=temp_out_channels,
                                  kernel_size=self.kernel_size,
@@ -594,6 +595,7 @@ class TempPointConv(nn.Module):
         return (next_X,  # (B * T) * (Zt + 2F + 2 + no_flat_features)
                 point_skip)  # for keeping track of the pointwise skip connections; B * Zt * T
 
+
     def temp_pointwise_no_skip(self, B=None, T=None, temp=None, bn_temp=None, point=None, bn_point=None, padding=None, prev_temp=None,
                                prev_point=None, temp_kernels=None, X_orig=None, repeat_flat=None):
 
@@ -607,7 +609,26 @@ class TempPointConv(nn.Module):
 
         ### Pointwise component ###
 
-        # Z is the number of extra features added by the previous pointwise layer (if it is layer 1 it is 2F + 2 + no_flat_features)
+        # prev_point shape: (B * T) * ((F * Y) + Z)
+        point_output = self.relu(self.main_dropout(bn_point(point(prev_point))))  # (B * T) * point_size
+
+        return (temp_output,  # B * (F * temp_kernels) * T
+                point_output)  # (B * T) * point_size
+
+
+    def temp_pointwise_no_skip_old(self, B=None, T=None, temp=None, bn_temp=None, point=None, bn_point=None, padding=None, prev_temp=None,
+                               prev_point=None, temp_kernels=None, X_orig=None, repeat_flat=None):
+
+        ### Temporal component ###
+
+        # Y is the number of channels in the previous temporal layer (could be 0 if this is the first layer)
+        # prev_temp shape: B * (F * Y) * T; N.B exception in the first layer where there are also mask features, in this case it is B * 2F * T
+
+        X_padded = pad(prev_temp, padding, 'constant', 0)  # B * (F * Y) * (T + padding)
+        temp_output = self.relu(self.temp_dropout(bn_temp(temp(X_padded))))  # B * (F * temp_kernels) * T
+
+        ### Pointwise component ###
+
         # prev_point shape: (B * T) * ((F * Y) + Z)
 
         # if this is not layer 1:

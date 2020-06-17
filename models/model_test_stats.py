@@ -43,5 +43,5 @@ def main(exp_dir):
     return
 
 if __name__=='__main__':
-    exp_dir = 'ChannelwiseLSTMMSE'
+    exp_dir = 'PointwiseOnlyNoDecay'
     main(exp_dir)
