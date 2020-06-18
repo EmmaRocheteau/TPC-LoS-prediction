@@ -43,5 +43,5 @@ def main(exp_dir):
     return
 
 if __name__=='__main__':
-    exp_dir = 'PointwiseOnlyNoDecay'
+    exp_dir = 'TPCNoSkip'
     main(exp_dir)
