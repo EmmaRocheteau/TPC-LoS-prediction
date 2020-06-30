@@ -4,7 +4,18 @@ eICU Length of Stay Prediction
 This repository contains the code used for Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit. 
  
 ## Citation
-If you use this code or the models in your research, please cite the following publication:
+If you use this code or the models in your research, please cite the following:
+
+```
+@misc{rocheteau2020,
+    title={Predicting Length of Stay in the Intensive Care Unit with Temporal Pointwise Convolutional Networks},
+    author={Emma Rocheteau and Pietro Liò and Stephanie Hyland},
+    year={2020},
+    eprint={2006.16109},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG}
+} 
+```
 
 ## Motivation
 The pressure of ever-increasing patient demand and budget restrictions make hospital bed management a daily challenge 
