@@ -5,7 +5,7 @@ from captum.attr import IntegratedGradients
 from torch import cat, ones
 
 time_point = 23  # this means 24 hours because of python's indexing
-batch_size = 2
+batch_size = 8
 
 if __name__=='__main__':
 
@@ -59,9 +59,9 @@ if __name__=='__main__':
             flat = attr[2].detach() * day_data
 
             # keep a running sum of the feature attributions
-            test_attr_ts = np.add(test_attr_ts, ts.numpy().sum(axis=0))
-            test_attr_diag = np.add(test_attr_diag, diag.numpy().sum(axis=0))
-            test_attr_flat = np.add(test_attr_flat, flat.numpy().sum(axis=0))
+            test_attr_ts = np.add(test_attr_ts, ts.cpu().numpy().sum(axis=0))
+            test_attr_diag = np.add(test_attr_diag, diag.cpu().numpy().sum(axis=0))
+            test_attr_flat = np.add(test_attr_flat, flat.cpu().numpy().sum(axis=0))
 
             N += int(sum(day_data))
 
