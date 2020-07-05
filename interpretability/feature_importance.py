@@ -64,7 +64,7 @@ if __name__=='__main__':
 
             N += int(sum(day_data))
 
-            del attr, day_data, ts, diag, flat, seq_lengths, mask, padded, diagnoses, flat, labels
+            del attr, day_data, ts, diag, flat, seq_lengths, mask, padded, diagnoses, labels
 
             if i % 100 == 0:
                 print('Done ' + str(N + 1))
