@@ -5,7 +5,7 @@ from captum.attr import IntegratedGradients
 from torch import cat, ones
 
 time_point = 23  # this means 24 hours because of python's indexing
-batch_size = 8
+batch_size = 4
 
 if __name__=='__main__':
 
