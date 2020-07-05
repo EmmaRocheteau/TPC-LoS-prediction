@@ -47,7 +47,7 @@ if __name__=='__main__':
         target = time_point - 5
 
         # if at least one sequence is longer than 24hrs
-        if max(seq_lengths.numpy()) - target > 0:
+        if max(seq_lengths.detach().numpy()) - target > 0:
 
             # The minus 5 is to compensate for the first five hours where predictions are not given.
             attr, delta = ig.attribute((padded, diagnoses, flat), target=target, return_convergence_delta=True)
