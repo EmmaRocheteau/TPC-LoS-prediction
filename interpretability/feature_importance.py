@@ -5,7 +5,7 @@ from captum.attr import IntegratedGradients
 from torch import cat, ones
 
 time_point = 23  # this means 24 hours because of python's indexing
-batch_size = 4
+batch_size = 2
 
 if __name__=='__main__':
 
@@ -41,16 +41,15 @@ if __name__=='__main__':
     test_attr_diag = np.zeros(293)
     test_attr_flat = np.zeros(65)
     N = 0
+    target = time_point - 5
 
     for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_batches):
-
-        target = time_point - 5
 
         # if at least one sequence is longer than 24hrs
         if max(seq_lengths.cpu().numpy()) - target > 0:
 
             # The minus 5 is to compensate for the first five hours where predictions are not given.
-            attr, delta = ig.attribute((padded, diagnoses, flat), target=target, return_convergence_delta=True)
+            attr = ig.attribute((padded, diagnoses, flat), target=target)
 
             # delete data that was less than a day
             day_data = mask[:, target].unsqueeze(1)
@@ -65,7 +64,9 @@ if __name__=='__main__':
 
             N += int(sum(day_data))
 
-            if i % 10 == 0:
+            del attr, day_data, ts, diag, flat, seq_lengths, mask, padded, diagnoses, flat, labels
+
+            if i % 100 == 0:
                 print('Done ' + str(N + 1))
                 np.savetxt('interpretability/ts.csv', test_attr_ts/N, delimiter=',', fmt='%f')
                 np.savetxt('interpretability/diag.csv', test_attr_diag/N, delimiter=',', fmt='%f')
