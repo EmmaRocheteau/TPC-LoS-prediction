@@ -64,7 +64,7 @@ class eICUReader(object):
     def get_mort_labels(self, labels):
         return
 
-    def batch_gen(self, batch_size=8):
+    def batch_gen(self, batch_size=8, time_before_pred=5):
 
         # note that once the generator is finished, the file will be closed automatically
         with open(self._timeseries_path, 'r') as timeseries_file:
@@ -80,13 +80,13 @@ class eICUReader(object):
                 padded, mask, seq_lengths = self.pad_sequences(ts_batch)
                 los_labels = self.get_los_labels(torch.tensor(self.labels.iloc[i*batch_size:(i+1)*batch_size,7].values, device=self._device).type(self._dtype), padded[:,0,:], mask)
 
-                # we must avoid taking data before 5 hours to avoid diagnoses and apache variable from the future
+                # we must avoid taking data before time_before_pred hours to avoid diagnoses and apache variable from the future
                 yield (padded,  # B * (2F + 2) * T
-                       mask[:, 5:],  # B * (T - 5)
+                       mask[:, time_before_pred:],  # B * (T - time_before_pred)
                        torch.tensor(self.diagnoses.iloc[i*batch_size:(i+1)*batch_size].values, device=self._device).type(self._dtype),  # B * D
                        torch.tensor(self.flat.iloc[i*batch_size:(i+1)*batch_size].values.astype(float), device=self._device).type(self._dtype),  # B * no_flat_features
-                       los_labels[:, 5:],
-                       seq_lengths - 5)
+                       los_labels[:, time_before_pred:],
+                       seq_lengths - time_before_pred)
 
 if __name__=='__main__':
     eICU_reader = eICUReader('/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/train')

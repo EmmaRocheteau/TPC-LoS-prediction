@@ -158,8 +158,7 @@ class TempPointConv(nn.Module):
         elif self.model_type == 'pointwise_only':
             self.init_pointwise()
         else:
-            raise NotImplementedError('Specified model type not supported; '
-                                      'supported types include tpc, temp_only and pointwise_only')
+            raise NotImplementedError('Specified model type not supported; supported types include tpc, temp_only and pointwise_only')
 
 
     def init_tpc(self):
@@ -408,7 +407,7 @@ class TempPointConv(nn.Module):
                               X[:, 0, :].unsqueeze(1),
                               X[:, -1, :].unsqueeze(1)), dim=1).permute(0, 2, 1).contiguous().view(B * T, self.F + 2)  # (B * T) * (F + 2)
             else:
-                X_orig = X.permute(0, 2, 1).view(B * T, 2 * self.F + 2)  # (B * T) * (2F + 2)
+                X_orig = X.permute(0, 2, 1).contiguous().view(B * T, 2 * self.F + 2)  # (B * T) * (2F + 2)
             repeat_args = {'repeat_flat': repeat_flat,
                            'X_orig': X_orig,
                            'B': B,
