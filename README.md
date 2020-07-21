@@ -26,7 +26,7 @@ convolution and pointwise (or 1x1) convolution, to solve the length of stay pred
 dataset. The model — which we refer to as Temporal Pointwise Convolution (TPC) — was developed using a tailored, 
 domain-specific approach. We specifically design the model to mitigate for common challenges with Electronic Health 
 Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance 
-benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
+benefits of 18-51% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
 
 ### eICU Pre-processing
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
