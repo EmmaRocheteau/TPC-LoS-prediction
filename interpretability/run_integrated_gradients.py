@@ -5,7 +5,7 @@ from captum.attr import IntegratedGradients
 from pathlib import Path
 
 time_point = 23  # this means 24 hours because of python's indexing
-batch_size = 8
+batch_size = 4
 
 p = Path('interpretability').glob('**/*.csv')
 csv_files = [x for x in p if x.is_file()]
