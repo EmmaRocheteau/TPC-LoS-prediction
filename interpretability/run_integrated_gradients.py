@@ -48,7 +48,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
         attr = ig.attribute((padded, diagnoses, flat), target=target)
 
         # day_data is an array containing the indices of patients who stayed at least 24 hours (or up to `timepoint')
-        day_data = mask[:, target].numpy().flatten().nonzero()[0]
+        day_data = mask[:, target].cpu().numpy().flatten().nonzero()[0]
         # we only include patients who are indexed in `day_data' from now on, we can define the number of these patients as B
         # ts is an array containing the sum of the absolute values for the integrated gradient attributions (the sum is taken across timepoints)
         ts = np.abs(attr[0].detach()[:, :, :time_point].cpu().numpy()[day_data]).sum(axis=2)  # B x (2F + 2)
