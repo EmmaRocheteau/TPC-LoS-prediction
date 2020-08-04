@@ -269,8 +269,8 @@ class TempPointConv(nn.Module):
                     temp_in_channels = self.F
                 linear_input_dim = (self.F + self.Zt - self.Z) * self.Y + self.Z + self.F + 2 + self.no_flat_features  # (F + Zt-1) * Y + Z + F + 2 + no_flat_features
 
-            temp = nn.Conv1d(in_channels=temp_in_channels,
-                             out_channels=temp_out_channels,
+            temp = nn.Conv1d(in_channels=temp_in_channels,  # (F + Zt) * (Y + 1)
+                             out_channels=temp_out_channels,  # (F + Zt) * Y
                              kernel_size=self.kernel_size,
                              stride=self.layers[i]['stride'],
                              dilation=self.layers[i]['dilation'],
