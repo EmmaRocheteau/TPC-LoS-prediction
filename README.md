@@ -1,3 +1,5 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/temporal-pointwise-convolutional-networks-for/predicting-patient-outcomes-on-eicu)](https://paperswithcode.com/sota/predicting-patient-outcomes-on-eicu?p=temporal-pointwise-convolutional-networks-for)
+
 eICU Length of Stay Prediction
 ===============================
 
@@ -8,13 +10,13 @@ If you use this code or the models in your research, please cite the following:
 
 ```
 @misc{rocheteau2020,
-    title={Predicting Length of Stay in the Intensive Care Unit with Temporal Pointwise Convolutional Networks},
+    title={Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit},
     author={Emma Rocheteau and Pietro Liò and Stephanie Hyland},
     year={2020},
-    eprint={2006.16109},
+    eprint={2007.09483},
     archivePrefix={arXiv},
     primaryClass={cs.LG}
-} 
+}
 ```
 
 ## Motivation
@@ -26,7 +28,7 @@ convolution and pointwise (or 1x1) convolution, to solve the length of stay pred
 dataset. The model — which we refer to as Temporal Pointwise Convolution (TPC) — was developed using a tailored, 
 domain-specific approach. We specifically design the model to mitigate for common challenges with Electronic Health 
 Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance 
-benefits of 22-59% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
+benefits of 18-51% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
 
 ### eICU Pre-processing
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
