@@ -51,14 +51,24 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
         day_data = mask[:, target].cpu().numpy().flatten().nonzero()[0]
         # we only include patients who are indexed in `day_data' from now on, we can define the number of these patients as B
         # ts is an array containing the sum of the absolute values for the integrated gradient attributions (the sum is taken across timepoints)
-        ts = np.abs(attr[0].detach()[:, :, :time_point].cpu().numpy()[day_data]).sum(axis=2)  # B x (2F + 2)
-        diag = attr[1].detach().cpu().numpy()[day_data]  # B x D
-        flat = attr[2].detach().cpu().numpy()[day_data]  # B x f
+        ts_attr = np.abs(attr[0].detach()[:, :, :time_point].cpu().numpy()[day_data]).sum(axis=2)  # B x (2F + 2)
+        diag_attr = attr[1].detach().cpu().numpy()[day_data]  # B x D
+        flat_attr = attr[2].detach().cpu().numpy()[day_data]  # B x f
 
-        for ar, fname in ((ts, 'ts.csv'), (flat, 'flat.csv'), (diag, 'diag.csv')):
+        ts_fts = np.abs(padded[:, :, :time_point].cpu().numpy()[day_data]).sum(axis=2)  # B x (2F + 2)
+        diag_fts = diagnoses.cpu().numpy()[day_data]  # B x D
+        flat_fts = flat.cpu().numpy()[day_data]  # B x f
+
+        for ar, fname in ((ts_attr, 'ts_attr.csv'),
+                          (flat_attr, 'flat_attr.csv'),
+                          (diag_attr, 'diag_attr.csv'),
+                          (ts_fts, 'ts_fts.csv'),
+                          (flat_fts, 'flat_fts.csv'),
+                          (diag_fts, 'diag_fts.csv')):
             with open('interpretability/'+fname, 'ba') as f:
                 np.savetxt(f, ar, delimiter=',', fmt='%f')
 
         N += len(day_data)
-        if i % 100 == 0:
-            print('Done ' + str(N))
+
+    if i % 100 == 0:
+        print('Done ' + str(N))
