@@ -9,8 +9,8 @@ batch_size = 2
 
 p = Path('interpretability').glob('**/*.csv')
 csv_files = [x for x in p if x.is_file()]
-for c in csv_files:
-    c.unlink()
+#for c in csv_files:
+    #c.unlink()
 
 base_dir = 'models/experiments/final/TPC'
 exp_dir = 'models/experiments/final/TPC/2020-06-27_2048171'
@@ -58,6 +58,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
         # ts is an array containing the sum of the absolute values for the integrated gradient attributions (the sum is taken across timepoints)
         abs_ts_attr = abs_ts_attr.sum(axis=2)/ts_nonzero  # B x (2F + 2)
         ts_attr = ts_attr.reshape(2 * 23, -1)
+        ts_attr[ts_attr == 0] = 'nan'
         diag_attr = attr[1].detach().cpu().numpy()[day_data]  # B x D
         diag_attr[diag_attr == 0] = 'nan'
         flat_attr = attr[2].detach().cpu().numpy()[day_data]  # B x f
@@ -65,6 +66,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
 
         abs_ts_fts = abs_ts_fts.sum(axis=2)/ts_nonzero  # B x (2F + 2)
         ts_fts = ts_fts.reshape(2 * 23, -1)
+        ts_fts[ts_fts == 0] = 'nan'
         diag_fts = diagnoses.cpu().numpy()[day_data]  # B x D
         diag_fts[diag_fts == 0] = 'nan'
         flat_fts = flat.cpu().numpy()[day_data]  # B x f

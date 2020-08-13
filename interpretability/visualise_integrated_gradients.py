@@ -39,6 +39,6 @@ def attr_plot(feature_type, plot_size):
 
     return
 
-attr_plot('diagnoses', (14, 7))
+#attr_plot('diagnoses', (14, 7))
 attr_plot('timeseries', (9, 7))
 attr_plot('flat', (8, 7))
