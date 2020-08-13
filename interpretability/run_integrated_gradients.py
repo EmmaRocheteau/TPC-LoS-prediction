@@ -9,8 +9,8 @@ batch_size = 2
 
 p = Path('interpretability').glob('**/*.csv')
 csv_files = [x for x in p if x.is_file()]
-#for c in csv_files:
-    #c.unlink()
+for c in csv_files:
+    c.unlink()
 
 base_dir = 'models/experiments/final/TPC'
 exp_dir = 'models/experiments/final/TPC/2020-06-27_2048171'
