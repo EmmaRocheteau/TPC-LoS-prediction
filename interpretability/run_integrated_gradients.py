@@ -49,26 +49,32 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
 
         # day_data is an array containing the indices of patients who stayed at least 24 hours (or up to `timepoint')
         day_data = mask[:, target].cpu().numpy().flatten().nonzero()[0]
-        abs_ts_attr = np.abs(attr[0].detach()[:, :, :time_point].cpu().numpy()[day_data])
-        abs_ts_data = np.abs(padded[:, :, :time_point].cpu().numpy()[day_data])
-        ts_nonzero = (abs_ts_data != 0).sum(axis=2)
+        ts_attr = attr[0].detach()[:, :, :time_point].cpu().numpy()[day_data]
+        abs_ts_attr = np.abs(ts_attr)
+        ts_fts = padded[:, :, :time_point].cpu().numpy()[day_data]
+        abs_ts_fts = np.abs(ts_fts)
+        ts_nonzero = (abs_ts_fts != 0).sum(axis=2)
         # we only include patients who are indexed in `day_data' from now on, we can define the number of these patients as B
         # ts is an array containing the sum of the absolute values for the integrated gradient attributions (the sum is taken across timepoints)
-        ts_attr = abs_ts_attr.sum(axis=2)/ts_nonzero  # B x (2F + 2)
+        abs_ts_attr = abs_ts_attr.sum(axis=2)/ts_nonzero  # B x (2F + 2)
+        ts_attr = ts_attr.reshape(2 * 23, -1)
         diag_attr = attr[1].detach().cpu().numpy()[day_data]  # B x D
         diag_attr[diag_attr == 0] = 'nan'
         flat_attr = attr[2].detach().cpu().numpy()[day_data]  # B x f
         flat_attr[flat_attr == 0] = 'nan'
 
-        ts_fts = abs_ts_data.sum(axis=2)/ts_nonzero  # B x (2F + 2)
+        abs_ts_fts = abs_ts_fts.sum(axis=2)/ts_nonzero  # B x (2F + 2)
+        ts_fts = ts_fts.reshape(2 * 23, -1)
         diag_fts = diagnoses.cpu().numpy()[day_data]  # B x D
         diag_fts[diag_fts == 0] = 'nan'
         flat_fts = flat.cpu().numpy()[day_data]  # B x f
         flat_fts[flat_fts == 0] = 'nan'
 
-        for ar, fname in ((ts_attr, 'ts_attr.csv'),
+        for ar, fname in ((abs_ts_attr, 'abs_ts_attr.csv'),
+                          (ts_attr, 'ts_attr.csv'),
                           (flat_attr, 'flat_attr.csv'),
                           (diag_attr, 'diag_attr.csv'),
+                          (abs_ts_fts, 'abs_ts_fts.csv'),
                           (ts_fts, 'ts_fts.csv'),
                           (flat_fts, 'flat_fts.csv'),
                           (diag_fts, 'diag_fts.csv')):

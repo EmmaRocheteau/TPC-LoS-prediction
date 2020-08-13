@@ -1,11 +1,12 @@
 import pandas as pd
 from itertools import islice
 import numpy as np
+import json
 import os
 
 def reconfigure_timeseries(timeseries, offset_column, feature_column=None, test=False):
     if test:
-        timeseries = timeseries.iloc[0:50000]  # for testing purposes
+        timeseries = timeseries.iloc[300000:5000000]
     timeseries.set_index(['patientunitstayid', pd.to_timedelta(timeseries[offset_column], unit='T')], inplace=True)
     timeseries.drop(columns=offset_column, inplace=True)
     if feature_column is not None:
@@ -100,11 +101,18 @@ def gen_patient_chunk(patients, size=1000):
 def gen_timeseries_file(eICU_path, test=False):
 
     print('==> Loading data from timeseries files...')
-    timeseries_lab = pd.read_csv(eICU_path + 'timeserieslab.csv')
-    timeseries_resp = pd.read_csv(eICU_path + 'timeseriesresp.csv')
-    timeseries_nurse = pd.read_csv(eICU_path + 'timeseriesnurse.csv')
-    timeseries_periodic = pd.read_csv(eICU_path + 'timeseriesperiodic.csv')
-    timeseries_aperiodic = pd.read_csv(eICU_path + 'timeseriesaperiodic.csv')
+    if test:
+        timeseries_lab = pd.read_csv(eICU_path + 'timeserieslab.csv', nrows=500000)
+        timeseries_resp = pd.read_csv(eICU_path + 'timeseriesresp.csv', nrows=500000)
+        timeseries_nurse = pd.read_csv(eICU_path + 'timeseriesnurse.csv', nrows=500000)
+        timeseries_periodic = pd.read_csv(eICU_path + 'timeseriesperiodic.csv', nrows=500000)
+        timeseries_aperiodic = pd.read_csv(eICU_path + 'timeseriesaperiodic.csv', nrows=500000)
+    else:
+        timeseries_lab = pd.read_csv(eICU_path + 'timeserieslab.csv')
+        timeseries_resp = pd.read_csv(eICU_path + 'timeseriesresp.csv')
+        timeseries_nurse = pd.read_csv(eICU_path + 'timeseriesnurse.csv')
+        timeseries_periodic = pd.read_csv(eICU_path + 'timeseriesperiodic.csv')
+        timeseries_aperiodic = pd.read_csv(eICU_path + 'timeseriesaperiodic.csv')
 
     print('==> Reconfiguring lab timeseries...')
     timeseries_lab = reconfigure_timeseries(timeseries_lab,
@@ -145,6 +153,7 @@ def gen_timeseries_file(eICU_path, test=False):
                                                  test=test)
 
     patients = timeseries_periodic.index.unique(level=0)
+
     size = 4000
     gen_chunks = gen_patient_chunk(patients, size=size)
     i = size
@@ -180,7 +189,7 @@ def add_time_of_day(processed_timeseries, flat_features):
     print('==> Adding time of day features...')
     processed_timeseries = processed_timeseries.join(flat_features[['hour']], how='inner', on='patient')
     processed_timeseries['hour'] = processed_timeseries['time'] + processed_timeseries['hour']
-    hour_list = np.linspace(0,1,24)  # make sure it's still scaled well
+    hour_list = np.linspace(0, 1, 24)  # make sure it's still scaled well
     processed_timeseries['hour'] = processed_timeseries['hour'].apply(lambda x: hour_list[x%24 - 24])
     return processed_timeseries
 
@@ -219,6 +228,7 @@ def timeseries_main(eICU_path, test=False):
     return
 
 if __name__=='__main__':
-    from eICU_preprocessing.run_all_preprocessing import eICU_path
-    test = True
+    with open('paths.json', 'r') as f:
+        eICU_path = json.load(f)["eICU_path"]
+    test = False
     timeseries_main(eICU_path, test)

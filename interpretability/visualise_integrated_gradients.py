@@ -1,18 +1,44 @@
 import pandas as pd
-from shap import summary_plot
+import numpy as np
+from interpretability.summary_plot import summary_plot
 import matplotlib.pyplot as plt
 
-feature_type = 'ts'
 
-features = pd.read_csv('interpretability/ts_fts.csv', header=None).values
-feature_names = list(pd.read_csv('eICU_data/preprocessed_timeseries.csv', nrows=0).columns)
-feature_names.pop(0)
-flat_weights = pd.read_csv('interpretability/ts_attr.csv', header=None).values
-flat_weights = flat_weights.clip(min=-15, max=15)
-#features = features[:5000, :]
-#flat_weights = flat_weights[:5000, :]
-summary_plot(flat_weights, features=features, feature_names=feature_names, show=False, plot_size=(10, 7))
-plt.tight_layout()
-plt.xlabel('Integrated Gradient')
-plt.savefig('interpretability/ts_plot.png', dpi=300)
+def attr_plot(feature_type, plot_size):
 
+    if feature_type == 'diagnoses':
+        shorthand = 'diag'
+        color_bar = False
+    elif feature_type == 'timeseries':
+        shorthand = 'ts'
+        color_bar = True
+    else:
+        shorthand = feature_type
+        color_bar = True
+
+    features = pd.read_csv('interpretability/{}_fts.csv'.format(shorthand), header=None).values
+    feature_names = list(pd.read_csv('eICU_data/test/{}.csv'.format(feature_type), nrows=0).columns)
+    feature_names.pop(0)
+    attr = pd.read_csv('interpretability/{}_attr.csv'.format(shorthand), header=None).values
+    attr = attr.clip(min=-20, max=20)
+    # features with zero attribution
+    nonzero_attr = np.nansum(attr, axis=0).nonzero()[0]
+    if feature_type == 'timeseries':
+        # only keep the non mask
+        nonzero_attr = nonzero_attr[nonzero_attr < 88]
+    attr = attr[:, nonzero_attr]
+    features = features[:, nonzero_attr]
+    feature_names = [feature_names[i] for i in nonzero_attr]
+    summary_plot(attr, features=features, feature_names=feature_names, show=False, plot_size=plot_size,
+                 plot_type='dot', sort=True, max_display=25, color_bar=color_bar)
+    plt.tight_layout()
+    plt.xlabel('Integrated Gradient')
+    plt.savefig('interpretability/{}_plot.png'.format(shorthand), dpi=300)
+
+    plt.show()
+
+    return
+
+attr_plot('diagnoses', (14, 7))
+attr_plot('timeseries', (9, 7))
+attr_plot('flat', (8, 7))
