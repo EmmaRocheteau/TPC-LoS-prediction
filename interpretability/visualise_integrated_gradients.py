@@ -12,6 +12,10 @@ def attr_plot(feature_type, plot_size):
     elif feature_type == 'timeseries':
         shorthand = 'ts'
         color_bar = True
+    elif feature_type == 'abs_timeseries':
+        shorthand = 'abs_ts'
+        feature_type = 'timeseries'
+        color_bar = True
     else:
         shorthand = feature_type
         color_bar = True
@@ -39,6 +43,6 @@ def attr_plot(feature_type, plot_size):
 
     return
 
-#attr_plot('diagnoses', (14, 7))
-attr_plot('timeseries', (9, 7))
+attr_plot('diagnoses', (14, 7))
+attr_plot('abs_timeseries', (9, 7))
 attr_plot('flat', (8, 7))

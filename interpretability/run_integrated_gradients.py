@@ -49,6 +49,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
 
         # day_data is an array containing the indices of patients who stayed at least 24 hours (or up to `timepoint')
         day_data = mask[:, target].cpu().numpy().flatten().nonzero()[0]
+        n = len(day_data)
         ts_attr = attr[0].detach()[:, :, :time_point].cpu().numpy()[day_data]
         abs_ts_attr = np.abs(ts_attr)
         ts_fts = padded[:, :, :time_point].cpu().numpy()[day_data]
@@ -57,7 +58,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
         # we only include patients who are indexed in `day_data' from now on, we can define the number of these patients as B
         # ts is an array containing the sum of the absolute values for the integrated gradient attributions (the sum is taken across timepoints)
         abs_ts_attr = abs_ts_attr.sum(axis=2)/ts_nonzero  # B x (2F + 2)
-        ts_attr = ts_attr.reshape(2 * 23, -1)
+        ts_attr = ts_attr.reshape(n * 23, -1)
         ts_attr[ts_attr == 0] = 'nan'
         diag_attr = attr[1].detach().cpu().numpy()[day_data]  # B x D
         diag_attr[diag_attr == 0] = 'nan'
@@ -65,7 +66,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
         flat_attr[flat_attr == 0] = 'nan'
 
         abs_ts_fts = abs_ts_fts.sum(axis=2)/ts_nonzero  # B x (2F + 2)
-        ts_fts = ts_fts.reshape(2 * 23, -1)
+        ts_fts = ts_fts.reshape(n * 23, -1)
         ts_fts[ts_fts == 0] = 'nan'
         diag_fts = diagnoses.cpu().numpy()[day_data]  # B x D
         diag_fts[diag_fts == 0] = 'nan'
@@ -83,7 +84,7 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
             with open('interpretability/'+fname, 'ba') as f:
                 np.savetxt(f, ar, delimiter=',', fmt='%f')
 
-        N += len(day_data)
+        N += n
 
     if i % 100 == 0:
         print('Done ' + str(N))
