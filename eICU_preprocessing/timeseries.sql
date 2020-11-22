@@ -61,8 +61,7 @@
             141168 |               441 |                     |                      |              62
 */
 
--- extract the most common lab tests in our cohort,
--- and the corresponding counts of how many patients have values for those labs
+-- extract the most common lab tests and the corresponding counts of how many patients have values for those labs
 drop materialized view if exists ld_commonlabs cascade;
 create materialized view ld_commonlabs as
   select labsstay.labname, count(distinct la.patientunitstayid) as count
@@ -96,8 +95,8 @@ create materialized view ld_timeserieslab as
       on la.patientunitstayid = l.patientunitstayid  -- only extract data for the cohort
     where l.labresultoffset between -1440 and p.unitdischargeoffset;
 
--- extract the most common respiratory chart entries in our cohort,
--- and the corresponding counts of how many patients have values for those respiratory charts
+-- extract the most common respiratory chart entries and the corresponding counts of how many patients have values for
+-- those respiratory charts
 drop materialized view if exists ld_commonresp cascade;
 create materialized view ld_commonresp as
   select respstay.respchartvaluelabel, count(distinct la.patientunitstayid) as count
@@ -131,8 +130,8 @@ create materialized view ld_timeseriesresp as
       on p.patientunitstayid = r.patientunitstayid
     where r.respchartoffset between -1440 and p.unitdischargeoffset;
 
--- extract the most common nurse chart entries in our cohort,
--- and the corresponding counts of how many patients have values for those nurse charts
+-- extract the most common nurse chart entries and the corresponding counts of how many patients have values for those
+-- nurse charts
 drop materialized view if exists ld_commonnurse cascade;
 create materialized view ld_commonnurse as
   select nursestay.nursingchartcelltypevallabel, count(distinct la.patientunitstayid) as count

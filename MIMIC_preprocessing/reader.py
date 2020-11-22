@@ -1,20 +1,10 @@
 import torch
 import pandas as pd
 from itertools import groupby, islice
-import numpy as np
 
-# bit hacky but passes checks and I don't have time to implement a neater solution
-lab_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 13, 15, 16, 18, 21, 22, 23, 24, 29, 32, 33, 34, 39, 40, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 62, 63, 67, 68, 69, 70, 71, 72, 75, 83, 84, 86]
-labs_to_keep = [0] + [(i + 1) for i in lab_indices] + [(i + 88) for i in lab_indices] + [-1]
-no_lab_indices = list(range(87))
-no_lab_indices = [x for x in no_lab_indices if x not in lab_indices]
-no_labs_to_keep = [0] + [(i + 1) for i in no_lab_indices] + [(i + 88) for i in no_lab_indices] + [-1]
-
-
-class eICUReader(object):
+class MIMICReader(object):
 
     def __init__(self, data_path, device=None, labs_only=False, no_labs=False):
-        self._diagnoses_path = data_path + '/diagnoses.csv'
         self._labels_path = data_path + '/labels.csv'
         self._flat_path = data_path + '/flat.csv'
         self._timeseries_path = data_path + '/timeseries.csv'
@@ -25,11 +15,9 @@ class eICUReader(object):
 
         self.labels = pd.read_csv(self._labels_path, index_col='patient')
         self.flat = pd.read_csv(self._flat_path, index_col='patient')
-        self.diagnoses = pd.read_csv(self._diagnoses_path, index_col='patient')
 
         # we minus 2 to calculate F because hour and time are not features for convolution
         self.F = (pd.read_csv(self._timeseries_path, index_col='patient', nrows=1).shape[1] - 2)//2
-        self.D = self.diagnoses.shape[1]
         self.no_flat_features = self.flat.shape[1]
 
         self.patients = list(self.labels.index)
@@ -42,12 +30,6 @@ class eICUReader(object):
         seq_lengths = [len(x) for x in ts_batch]
         max_len = max(seq_lengths)
         padded = [patient + [[0] * (self.F * 2 + 2)] * (max_len - len(patient)) for patient in ts_batch]
-        if self.labs_only:
-            padded = np.array(padded)
-            padded = padded[:, :, labs_to_keep]
-        if self.no_labs:
-            padded = np.array(padded)
-            padded = padded[:, :, no_labs_to_keep]
         padded = torch.tensor(padded, device=self._device).type(self._dtype).permute(0, 2, 1)  # B * (2F + 2) * T
         padded[:, 0, :] /= 24  # scale the time into days instead of hours
         mask = torch.zeros(padded[:, 0, :].shape, device=self._device).type(self._dtype)
@@ -83,11 +65,10 @@ class eICUReader(object):
                 # we must avoid taking data before time_before_pred hours to avoid diagnoses and apache variable from the future
                 yield (padded,  # B * (2F + 2) * T
                        mask[:, time_before_pred:],  # B * (T - time_before_pred)
-                       torch.tensor(self.diagnoses.iloc[i*batch_size:(i+1)*batch_size].values, device=self._device).type(self._dtype),  # B * D
                        torch.tensor(self.flat.iloc[i*batch_size:(i+1)*batch_size].values.astype(float), device=self._device).type(self._dtype),  # B * no_flat_features
                        los_labels[:, time_before_pred:],
                        seq_lengths - time_before_pred)
 
 if __name__=='__main__':
-    eICU_reader = eICUReader('/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/eICU_data/train')
+    eICU_reader = MIMICReader('/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/MIMIC_data/train')
     print(next(eICU_reader.batch_gen()))

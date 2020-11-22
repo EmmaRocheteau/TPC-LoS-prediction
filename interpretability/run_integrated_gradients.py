@@ -73,13 +73,11 @@ for i, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(test_ba
         flat_fts = flat.cpu().numpy()[day_data]  # B x f
         flat_fts[flat_fts == 0] = 'nan'
 
-        for ar, fname in ((abs_ts_attr, 'abs_ts_attr.csv'),
-                          (ts_attr, 'ts_attr.csv'),
-                          (flat_attr, 'flat_attr.csv'),
+        for ar, fname in ((abs_ts_attr, 'abs_ts_attr24.csv'),
+                          (flat_attr, 'flat_attr24.csv'),
                           (diag_attr, 'diag_attr.csv'),
-                          (abs_ts_fts, 'abs_ts_fts.csv'),
-                          (ts_fts, 'ts_fts.csv'),
-                          (flat_fts, 'flat_fts.csv'),
+                          (abs_ts_fts, 'abs_ts_fts24.csv'),
+                          (flat_fts, 'flat_fts24.csv'),
                           (diag_fts, 'diag_fts.csv')):
             with open('interpretability/'+fname, 'ba') as f:
                 np.savetxt(f, ar, delimiter=',', fmt='%f')

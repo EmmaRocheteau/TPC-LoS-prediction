@@ -1,3 +1,4 @@
 {
-  "eICU_path": "/Users/emmarocheteau/PycharmProjects/eICU-LoS-prediction/eICU_data/"
+  "eICU_path": "/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/eICU_data/",
+  "MIMIC_path": "/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/MIMIC_data/"
 }
