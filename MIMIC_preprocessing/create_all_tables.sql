@@ -1,7 +1,7 @@
 -- creates all the tables and produces csv files
 -- takes a while to run (about an hour)
 
--- change the paths to those in your local computer using find and replace for '/Users/emmarocheteau/PycharmProjects/MIMIC-LoS-prediction/MIMIC_data/'.
+-- change the paths to those in your local computer using find and replace for '/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/MIMIC_data/'.
 -- keep the file names the same
 
 \i MIMIC_preprocessing/labels.sql
