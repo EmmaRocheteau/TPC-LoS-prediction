@@ -1,4 +1,4 @@
-MIMIC Preprocessing
+MIMIC Pre-processing
 ==================================
 
 1) To run the sql files you must have the MIMIC-IV database set up: https://physionet.org/content/mimiciv/0.4/. 

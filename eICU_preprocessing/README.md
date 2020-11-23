@@ -1,4 +1,4 @@
-eICU Preprocessing
+eICU Pre-processing
 ==================================
 
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
