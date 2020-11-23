@@ -43,7 +43,8 @@ create materialized view ld_timeserieslab as
       on la.hadm_id = l.hadm_id  -- only extract data for the cohort
     -- epoch extracts the number of seconds since 1970-01-01 00:00:00-00, we want to extract measurements between
     -- admission and the end of the patients' stay
-    where (date_part('epoch', l.charttime) - date_part('epoch', la.intime))/(60*60*24) between -1 and la.los;
+    where (date_part('epoch', l.charttime) - date_part('epoch', la.intime))/(60*60*24) between -1 and la.los
+      and l.valuenum is not null;  -- filter out null values
 
 -- extract the most common chartevents and the corresponding counts of how many patients have values for those chartevents
 drop materialized view if exists ld_commonchart cascade;
@@ -88,4 +89,5 @@ create materialized view ld_timeseries as
       on cch.label = d.label  -- only include the common chart features
     inner join ld_labels as la
       on la.stay_id = ch.stay_id  -- only extract data for the cohort
-    where (date_part('epoch', ch.charttime) - date_part('epoch', la.intime))/(60*60*24) between -1 and la.los;
+    where (date_part('epoch', ch.charttime) - date_part('epoch', la.intime))/(60*60*24) between -1 and la.los
+      and ch.valuenum is not null;  -- filter out null values
