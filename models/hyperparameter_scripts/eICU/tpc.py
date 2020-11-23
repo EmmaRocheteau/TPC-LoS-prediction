@@ -50,7 +50,7 @@ if __name__=='__main__':
     c['last_linear_size'] = random.choice(param_grid['last_linear_size'])
     c['diagnosis_size'] = random.choice(param_grid['diagnosis_size'])
 
-    log_folder_path = create_folder('models/experiments/hyperparameters', c.exp_name)
+    log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     tpc = TPC(config=c,
               n_epochs=c.n_epochs,
               name=c.exp_name,

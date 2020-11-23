@@ -26,7 +26,7 @@ if __name__=='__main__':
     c['lstm_dropout_rate'] = random.choice(param_grid['lstm_dropout_rate'])
     c['hidden_size'] = random.choice(param_grid['hidden_size'])
 
-    log_folder_path = create_folder('models/experiments/hyperparameters', c.exp_name)
+    log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     standard_lstm = BaselineLSTM(config=c,
                                  n_epochs=c.n_epochs,
                                  name=c.exp_name,

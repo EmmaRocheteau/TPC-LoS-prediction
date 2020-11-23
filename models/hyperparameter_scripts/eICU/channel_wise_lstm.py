@@ -15,7 +15,7 @@ if __name__=='__main__':
     hidden_size_choice = list(int(x) for x in np.logspace(np.log2(4), np.log2(16), base=2, num=6))
     c['hidden_size'] = random.choice(hidden_size_choice)
 
-    log_folder_path = create_folder('models/experiments/hyperparameters', c.exp_name)
+    log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     channel_wise_lstm = BaselineLSTM(config=c,
                                      n_epochs=c.n_epochs,
                                      name=c.exp_name,

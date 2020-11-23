@@ -16,7 +16,7 @@ if __name__=='__main__':
     temp_kernels_choice = list(int(x) for x in np.logspace(np.log2(16), np.log2(64), base=2, num=9))
     c['temp_kernels'] = [random.choice(temp_kernels_choice)]*c['n_layers']
 
-    log_folder_path = create_folder('models/experiments/hyperparameters', c.exp_name)
+    log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     temp_weight_share = TPC(config=c,
                             n_epochs=c.n_epochs,
                             name=c.exp_name,
