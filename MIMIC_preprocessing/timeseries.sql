@@ -16,19 +16,19 @@ create materialized view ld_commonlabs as
     select itemid, avg(count) as avg_obs
     from (select itemid, count(*) from labsstay group by itemid, stay_id) as obs_per_stay
     group by itemid
-    having avg(count) > 2)  -- we want the features to have at least 2 values entered for the average patient
-  select d.label, count(distinct labsstay.stay_id) as count
+    having avg(count) > 3)  -- we want the features to have at least 3 values entered for the average patient
+  select d.label, count(distinct labsstay.stay_id) as count, a.avg_obs
     from labsstay
     inner join d_labitems as d
       on d.itemid = labsstay.itemid
     inner join avg_obs_per_stay as a
       on a.itemid = labsstay.itemid
-    group by d.label
-    -- only keep data that is present at some point for at least 40% of the patients, this gives us 35 lab features
-    having count(distinct labsstay.stay_id) > (select count(distinct stay_id) from ld_labels)*0.4
+    group by d.label, a.avg_obs
+    -- only keep data that is present at some point for at least 25% of the patients, this gives us 45 lab features
+    having count(distinct labsstay.stay_id) > (select count(distinct stay_id) from ld_labels)*0.25
     order by count desc;
 
--- get the time series features from the most common lab tests (35 of these)
+-- get the time series features from the most common lab tests (45 of these)
 drop materialized view if exists ld_timeserieslab cascade;
 create materialized view ld_timeserieslab as
   -- we extract the number of minutes in labresultoffset because this is how the data in eICU is arranged
@@ -65,18 +65,18 @@ create materialized view ld_commonchart as
     from (select itemid, count(*) from chartstay group by itemid, stay_id) as obs_per_stay
     group by itemid
     having avg(count) > 5)  -- we want the features to have at least 5 values entered for the average patient
-  select d.label, count(distinct chartstay.stay_id) as count
+  select d.label, count(distinct chartstay.stay_id) as count, a.avg_obs
     from chartstay
     inner join d_items as d
       on d.itemid = chartstay.itemid
     inner join avg_obs_per_stay as a
       on a.itemid = chartstay.itemid
-    group by d.label
-    -- only keep data that is present at some point for at least 40% of the patients, this gives us 91 lab features
-    having count(distinct chartstay.stay_id) > (select count(distinct stay_id) from ld_labels)*0.4
+    group by d.label, a.avg_obs
+    -- only keep data that is present at some point for at least 25% of the patients, this gives us 129 chartevents features
+    having count(distinct chartstay.stay_id) > (select count(distinct stay_id) from ld_labels)*0.25
     order by count desc;
 
--- get the time series features from the most common chart features (91 of these)
+-- get the time series features from the most common chart features (129 of these)
 drop materialized view if exists ld_timeseries cascade;
 create materialized view ld_timeseries as
   -- we extract the number of minutes in chartoffset because this is how the data in eICU is arranged
