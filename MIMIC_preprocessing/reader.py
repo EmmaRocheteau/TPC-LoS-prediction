@@ -19,6 +19,7 @@ class MIMICReader(object):
         # we minus 2 to calculate F because hour and time are not features for convolution
         self.F = (pd.read_csv(self._timeseries_path, index_col='patient', nrows=1).shape[1] - 2)//2
         self.no_flat_features = self.flat.shape[1]
+        self.D = 1  # no diagnoses for MIMIC
 
         self.patients = list(self.labels.index)
         self.no_patients = len(self.patients)
@@ -60,7 +61,7 @@ class MIMICReader(object):
             for i, batch in enumerate(patient_batches):
                 ts_batch = [[line[1:] for line in ts] for _, ts in islice(ts_patient, batch_size)]
                 padded, mask, seq_lengths = self.pad_sequences(ts_batch)
-                los_labels = self.get_los_labels(torch.tensor(self.labels.iloc[i*batch_size:(i+1)*batch_size,7].values, device=self._device).type(self._dtype), padded[:,0,:], mask)
+                los_labels = self.get_los_labels(torch.tensor(self.labels.iloc[i*batch_size:(i+1)*batch_size,3].values, device=self._device).type(self._dtype), padded[:,0,:], mask)
 
                 # we must avoid taking data before time_before_pred hours to avoid diagnoses and apache variable from the future
                 yield (padded,  # B * (2F + 2) * T
@@ -70,5 +71,5 @@ class MIMICReader(object):
                        seq_lengths - time_before_pred)
 
 if __name__=='__main__':
-    eICU_reader = MIMICReader('/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/MIMIC_data/train')
-    print(next(eICU_reader.batch_gen()))
+    MIMIC_reader = MIMICReader('/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/MIMIC_data/train')
+    print(next(MIMIC_reader.batch_gen()))

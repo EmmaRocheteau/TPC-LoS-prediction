@@ -1,5 +1,6 @@
 import torch
 from eICU_preprocessing.reader import eICUReader
+from MIMIC_preprocessing.reader import MIMICReader
 from eICU_preprocessing.split_train_test import create_folder
 import numpy as np
 from models.metrics import print_metrics_regression
@@ -7,6 +8,7 @@ from trixi.experiment.pytorchexperiment import PytorchExperiment
 import os
 from models.shuffle_train import shuffle_train
 from eICU_preprocessing.run_all_preprocessing import eICU_path
+from MIMIC_preprocessing.run_all_preprocessing import MIMIC_path
 
 # view the results by running: python3 -m trixi.browser --port 8080 BASEDIR
 
@@ -53,11 +55,18 @@ class ExperimentTemplate(PytorchExperiment):
         # set bool type for where statements
         self.bool_type = torch.cuda.BoolTensor if self.device == torch.device('cuda') else torch.BoolTensor
 
-        self.train_datareader = eICUReader(eICU_path + 'train', device=self.device,
+        # get datareader
+        if self.config.dataset == 'MIMIC':
+            self.datareader = MIMICReader
+            self.data_path = MIMIC_path
+        else:
+            self.datareader = eICUReader
+            self.data_path = eICU_path
+        self.train_datareader = self.datareader(self.data_path + 'train', device=self.device,
                                            labs_only=self.config.labs_only, no_labs=self.config.no_labs)
-        self.val_datareader = eICUReader(eICU_path + 'val', device=self.device,
+        self.val_datareader = self.datareader(self.data_path + 'val', device=self.device,
                                          labs_only=self.config.labs_only, no_labs=self.config.no_labs)
-        self.test_datareader = eICUReader(eICU_path + 'test', device=self.device,
+        self.test_datareader = self.datareader(self.data_path + 'test', device=self.device,
                                           labs_only=self.config.labs_only, no_labs=self.config.no_labs)
         self.no_train_batches = len(self.train_datareader.patients) / self.config.batch_size
         self.checkpoint_counter = 0
@@ -82,10 +91,17 @@ class ExperimentTemplate(PytorchExperiment):
         train_y_hat = np.array([])
         train_y = np.array([])
 
-        for batch_idx, (padded, mask, diagnoses, flat, labels, seq_lengths) in enumerate(train_batches):
+        for batch_idx, batch in enumerate(train_batches):
 
             if batch_idx > (self.no_train_batches // (100 / self.config.percentage_data)):
                 break
+
+            # unpack batch
+            if self.config.dataset == 'MIMIC':
+                padded, mask, flat, labels, seq_lengths = batch
+                diagnoses = None
+            else:
+                padded, mask, diagnoses, flat, labels, seq_lengths = batch
 
             self.optimiser.zero_grad()
             y_hat = self.model(padded, diagnoses, flat)
@@ -145,7 +161,14 @@ class ExperimentTemplate(PytorchExperiment):
             val_y_hat = np.array([])
             val_y = np.array([])
 
-            for (padded, mask, diagnoses, flat, labels, seq_lengths) in val_batches:
+            for batch in val_batches:
+
+                # unpack batch
+                if self.config.dataset == 'MIMIC':
+                    padded, mask, flat, labels, seq_lengths = batch
+                    diagnoses = None
+                else:
+                    padded, mask, diagnoses, flat, labels, seq_lengths = batch
 
                 y_hat = self.model(padded, diagnoses, flat)
                 loss = self.model.loss(y_hat, labels, mask, seq_lengths, self.device, self.config.sum_losses, self.config.loss)
@@ -179,7 +202,14 @@ class ExperimentTemplate(PytorchExperiment):
         test_y_hat = np.array([])
         test_y = np.array([])
 
-        for (padded, mask, diagnoses, flat, labels, seq_lengths) in test_batches:
+        for batch in test_batches:
+
+            # unpack batch
+            if self.config.dataset == 'MIMIC':
+                padded, mask, flat, labels, seq_lengths = batch
+                diagnoses = None
+            else:
+                padded, mask, diagnoses, flat, labels, seq_lengths = batch
 
             y_hat = self.model(padded, diagnoses, flat)
             loss = self.model.loss(y_hat, labels, mask, seq_lengths, self.device, self.config.sum_losses, self.config.loss)

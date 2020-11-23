@@ -33,6 +33,7 @@ class BaseLSTM(nn.Module):
         self.no_flat_features = no_flat_features
         self.no_exp = config.no_exp
         self.momentum = 0.01 if self.batchnorm == 'low_momentum' else 0.1
+        self.no_diag = config.no_diag
 
         self.n_units = self.hidden_size // 2 if self.bidirectional else self.hidden_size
         self.n_dir = 2 if self.bidirectional else 1
@@ -75,8 +76,10 @@ class BaseLSTM(nn.Module):
         # input shape: (B * T) * (n_units + diagnosis_size + no_flat_features)
         # output shape: (B * T) * last_linear_size
         channel_wise = self.F if self.channelwise else 1
-        self.point = nn.Linear(in_features=self.n_units * channel_wise + self.diagnosis_size + self.no_flat_features,
-                                 out_features=self.last_linear_size)
+        input_size = self.n_units * channel_wise + self.diagnosis_size + self.no_flat_features
+        if self.no_diag:
+            input_size = input_size - self.diagnosis_size
+        self.point = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
 
         # input shape: (B * T) * last_linear_size
         if self.batchnorm in ['mybatchnorm', 'pointonly', 'low_momentum']:
@@ -135,12 +138,15 @@ class BaseLSTM(nn.Module):
 
         X_final = self.relu(self.lstm_dropout(lstm_output.permute(1, 2, 0)))
 
-        diagnoses_enc = self.relu(self.main_dropout(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
-
         # note that we cut off at 5 hours here because the model is only valid from 5 hours onwards
-        combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
-                                 diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
-                                 X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
+        if self.no_diag:
+            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
+                                     X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
+        else:
+            diagnoses_enc = self.relu(self.main_dropout(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
+            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
+                                     diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
+                                     X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
 
         last_point = self.relu(self.main_dropout(self.bn_point_last(self.point(combined_features))))
 

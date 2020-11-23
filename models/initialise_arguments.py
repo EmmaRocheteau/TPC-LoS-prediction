@@ -5,6 +5,7 @@ def initialise_arguments():
     parser = argparse.ArgumentParser()
 
     # general
+    parser.add_argument('--dataset', default='eICU', type=str)
     parser.add_argument('-disable_cuda', action='store_true')
     parser.add_argument('-intermediate_reporting', action='store_true')
     parser.add_argument('--batch_size_test', default=64, type=int)
@@ -56,6 +57,8 @@ def initialise_tpc_arguments():
     c = gen_config(parser)
     c['temp_kernels'] = [c['no_temp_kernels']]*c['n_layers']
     c['point_sizes'] = [c['point_size']]*c['n_layers']
+    if c['dataset'] == 'MIMIC':  # set no_diag to True if the dataset is MIMIC
+        c['no_diag'] = True
     return c
 
 def initialise_lstm_arguments():
@@ -69,6 +72,8 @@ def initialise_lstm_arguments():
     parser.add_argument('-bidirectional', action='store_true')
     parser.add_argument('-channelwise', action='store_true')
     c = gen_config(parser)
+    if c['dataset'] == 'MIMIC':  # set no_diag to True if the dataset is MIMIC
+        c['no_diag'] = True
     return c
 
 def initialise_transformer_arguments():
@@ -83,4 +88,6 @@ def initialise_transformer_arguments():
     parser.add_argument('--trans_dropout_rate', default=0, type=float)
     parser.add_argument('-positional_encoding', action='store_true')  # default is False
     c = gen_config(parser)
+    if c['dataset'] == 'MIMIC':  # set no_diag to True if the dataset is MIMIC
+        c['no_diag'] = True
     return c
