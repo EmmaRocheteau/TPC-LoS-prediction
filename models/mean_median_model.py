@@ -6,6 +6,7 @@ from MIMIC_preprocessing.reader import MIMICReader
 from models.experiment_template import remove_padding
 from eICU_preprocessing.run_all_preprocessing import eICU_path
 from MIMIC_preprocessing.run_all_preprocessing import MIMIC_path
+from models.metrics import print_metrics_regression
 
 
 def mean_median(dataset):
@@ -55,4 +56,10 @@ def mean_median(dataset):
     test_y['mean'] = mean_train
     test_y['median'] = median_train
 
-    return mean_train, median_train, test_y
+    print('Total predictions:')
+    print('Using mean value of {}...'.format(mean_train))
+    print_metrics_regression(test_y['true'], test_y['mean'])
+    print('Using median value of {}...'.format(median_train))
+    print_metrics_regression(test_y['true'], test_y['median'])
+
+    return

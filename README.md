@@ -30,6 +30,42 @@ domain-specific approach. We specifically design the model to mitigate for commo
 Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance 
 benefits of 18-51% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
 
+## Headline Results
+
+We report on the following metrics: 
+- Mean absolute deviation (MAD)
+- Mean absolute percentage error (MAPE)
+- Mean squared error (MSE)
+- Mean squared log error (MSLE)
+- Coefficient of determination (R<sup>2</sup>)
+- Cohen Kappa Score (Harutyunyan et al. 2019)
+
+### eICU
+
+Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
+--- | --- | --- | --- | --- | --- | ---
+Mean* | 3.21 | 395.7 | 29.5 | 2.87 | 0.00 | 0.00
+Median* | 2.76 | 184.4 | 32.6 | 2.15 | -0.11 | 0.00
+LSTM | 2.39±0.00 | 118.2±1.1 | 26.9±0.1 | 1.47±0.01 | 0.09±0.00 | 0.28±0.00
+CW LSTM | 2.37±0.00 | 114.5±0.4 | 26.6±0.1 | 1.43±0.00 | 0.10±0.00 | 0.30±0.00
+Transformer | 2.36±0.00 | 114.1±0.6 | 26.7±0.1 | 1.43±0.00 | 0.09±0.00 | 0.30±0.00
+TPC | 1.78±0.02 | 63.5±4.3 | 21.7±0.5 | 0.70±0.03 | 0.27±0.02 | 0.58±0.01
+
+Our model (TPC) significantly outperforms all baselines by large margins. *The mean and median values were 3.5 and 1.7 days respectively.
+
+### MIMIC
+
+These results are preliminary.
+
+Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
+--- | --- | --- | --- | --- | --- | ---
+Mean* | 5.24 | 77.7 | 474.9 | 2.80 | 0.00 | 0.00
+Median* | 4.60 | 86.8 | 216.8 | 2.09 | -0.12 | 0.00
+
+*The mean and median values were 5.7 and 2.7 days respectively.
+
+## Implementation Instructions
+
 ### eICU Pre-processing
 
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
@@ -136,3 +172,6 @@ benefits of 18-51% (metric dependent) over the commonly used Long-Short Term Mem
     ```
     python -m models.final_experiment_scripts.eICU.tpc
     ```
+    
+### References
+Hrayr Harutyunyan, Hrant Khachatrian, David C. Kale, Greg Ver Steeg, and Aram Galstyan. Multitask Learning and Benchmarking with Clinical Time Series Data. Scientific Data, 6(96), 2019.
