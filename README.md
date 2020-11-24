@@ -45,9 +45,9 @@ TPC | 1.78±0.02 | 63.5±4.3 | 21.7±0.5 | 0.70±0.03 | 0.27±0.02 | 0.58±0.01
 
 Our model (TPC) significantly outperforms all baselines by large margins. *The mean and median values were 3.5 and 1.7 days respectively.
 
-### MIMIC
+### MIMIC-IV
 
-These results are preliminary.
+These results are preliminary. Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
 
 Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
