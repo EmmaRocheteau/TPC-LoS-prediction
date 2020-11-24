@@ -59,8 +59,8 @@ These results are preliminary.
 
 Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
-Mean* | 5.24 | 77.7 | 474.9 | 2.80 | 0.00 | 0.00
-Median* | 4.60 | 86.8 | 216.8 | 2.09 | -0.12 | 0.00
+Mean* | 5.24 | 474.9 | 77.7 | 2.80 | 0.00 | 0.00
+Median* | 4.60 | 216.8 | 86.8 | 2.09 | -0.12 | 0.00
 
 *The mean and median values were 5.7 and 2.7 days respectively.
 
