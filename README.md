@@ -31,6 +31,7 @@ We report on the following metrics:
 - Mean squared log error (MSLE)
 - Coefficient of determination (R<sup>2</sup>)
 - Cohen Kappa Score (Harutyunyan et al. 2019)
+
 For the first four metrics, lower is better. For the last two, higher is better.
 
 ### eICU
