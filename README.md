@@ -51,7 +51,8 @@ CW LSTM | 2.37±0.00 | 114.5±0.4 | 26.6±0.1 | 1.43±0.00 | 0.10±0.00 | 0.30±
 Transformer | 2.36±0.00 | 114.1±0.6 | 26.7±0.1 | 1.43±0.00 | 0.09±0.00 | 0.30±0.00
 TPC | 1.78±0.02 | 63.5±4.3 | 21.7±0.5 | 0.70±0.03 | 0.27±0.02 | 0.58±0.01
 
-Our model (TPC) significantly outperforms all baselines by large margins. *The mean and median values were 3.5 and 1.7 days respectively.
+Our model (TPC) significantly outperforms all baselines by large margins. 
+*The mean and median "models" always predict 3.5 and 1.7 days respectively (the mean and median of the training set).
 
 ### MIMIC
 
@@ -61,8 +62,10 @@ Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
 Mean* | 5.24 | 474.9 | 77.7 | 2.80 | 0.00 | 0.00
 Median* | 4.60 | 216.8 | 86.8 | 2.09 | -0.12 | 0.00
+LSTM | 3.86 | 114.8 | 72.3 | 1.36 | 0.07 | 0.37
+Transformer | 3.78 | 120.4 | 69.8 | 1.29 | 0.10 | 0.39
 
-*The mean and median values were 5.7 and 2.7 days respectively.
+*The mean and median "models" always predict 5.7 and 2.7 days respectively (the mean and median of the training set).
 
 ## Implementation Instructions
 
