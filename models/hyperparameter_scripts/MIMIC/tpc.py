@@ -4,6 +4,7 @@ from models.hyperparameter_scripts.eICU.tpc import get_hyperparam_config
 
 
 if __name__=='__main__':
+
     c = get_hyperparam_config()
     c['dataset'] = 'MIMIC'
     c['no_diag'] = True

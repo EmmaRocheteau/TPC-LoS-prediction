@@ -24,7 +24,7 @@ def get_metrics(exp_dir):
     return stats
 
 if __name__=='__main__':
-    path = '/Users/emmarocheteau/PycharmProjects/TPC-LoS-prediction/models/experiments/final/'
+    path = '/models/experiments/final/'
     exp1 = get_metrics('TPC')
     exp2 = get_metrics('TPCNoDecay')
 

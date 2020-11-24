@@ -20,6 +20,7 @@ def get_hyperparam_config():
 
 
 if __name__=='__main__':
+
     log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     temp_weight_share = TPC(config=c,
                             n_epochs=c.n_epochs,

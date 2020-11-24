@@ -30,6 +30,7 @@ def get_hyperparam_config():
 
 
 if __name__=='__main__':
+
     c = get_hyperparam_config()
     log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     standard_lstm = BaselineLSTM(config=c,

@@ -4,6 +4,7 @@ from models.hyperparameter_scripts.eICU.channel_wise_lstm import get_hyperparam_
 
 
 if __name__=='__main__':
+
     c = get_hyperparam_config()
     c['dataset'] = 'MIMIC'
     c['no_diag'] = True
