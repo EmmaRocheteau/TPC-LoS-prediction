@@ -20,15 +20,7 @@ If you use this code or the models in your research, please cite the following:
 ```
 
 ## Motivation
-The pressure of ever-increasing patient demand and budget restrictions make hospital bed management a daily challenge 
-for clinical staff. Most critical, is the efficient allocation of resource-heavy Intensive Care Unit (ICU) beds to the 
-patients who need life support. Central to solving this problem is knowing for how long the current set of ICU patients 
-are likely to stay in the unit. In this work we propose a new deep learning model based on the combination of temporal 
-convolution and pointwise (or 1x1) convolution, to solve the length of stay prediction task on the eICU critical care 
-dataset. The model — which we refer to as Temporal Pointwise Convolution (TPC) — was developed using a tailored, 
-domain-specific approach. We specifically design the model to mitigate for common challenges with Electronic Health 
-Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance 
-benefits of 18-51% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network.
+The pressure of ever-increasing patient demand and budget restrictions make hospital bed management a daily challenge for clinical staff. Most critical is the efficient allocation of resource-heavy Intensive Care Unit (ICU) beds to the patients who need life support. Central to solving this problem is knowing for how long the current set of ICU patients are likely to stay in the unit. In this work, we propose a new deep learning model based on the combination of temporal convolution and pointwise (1x1) convolution, to solve the length of stay prediction task on the MIMIC-IV and eICU critical care datasets. The model – which we refer to as Temporal Pointwise Convolution (TPC) – is specifically designed to mitigate for common challenges with Electronic Health Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance benefits of 18-51% (metric dependent) over the commonly used Long-Short Term Memory (LSTM) network, and the multi-head self-attention network known as the Transformer.
 
 ## Headline Results
 
@@ -54,9 +46,9 @@ TPC | 1.78±0.02 | 63.5±4.3 | 21.7±0.5 | 0.70±0.03 | 0.27±0.02 | 0.58±0.01
 Our model (TPC) significantly outperforms all baselines by large margins. 
 *The mean and median "models" always predict 3.5 and 1.7 days respectively (the mean and median of the training set).
 
-### MIMIC
+### MIMIC-IV
 
-These results are preliminary.
+These results are preliminary. Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
 
 Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
