@@ -44,8 +44,11 @@ def preprocess_flat(flat):
     # these are mainly found in height
     # so we create another variable to tell the model when this has been imputed
     flat['nullheight'] = flat['height'].isnull().astype(int)
-    flat['weight'].fillna(0, inplace=True)  # only 21 patients
-    flat['height'].fillna(0, inplace=True)  # 16623 patients
+    flat['weight'].fillna(0, inplace=True)  # null in only 83 patients
+    flat['height'].fillna(0, inplace=True)  # null in 38217 patients
+    flat['eyes'].fillna(0, inplace=True)  # null in 192 patients
+    flat['motor'].fillna(0, inplace=True)  # null in 270 patients
+    flat['verbal'].fillna(0, inplace=True)  # null in 6240 patients
 
     return flat
 

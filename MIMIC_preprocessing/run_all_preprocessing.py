@@ -15,4 +15,4 @@ if __name__=='__main__':
         pass
     timeseries_main(MIMIC_path, test=False)
     flat_and_labels_main(MIMIC_path)
-    split_train_test(MIMIC_path, is_test=False, MIMIC=True)
+    split_train_test(MIMIC_path, is_test=False, MIMIC=True, cleanup=False)

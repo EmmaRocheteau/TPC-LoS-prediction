@@ -159,6 +159,8 @@ def gen_timeseries_file(eICU_path, test=False):
     i = size
     header = True  # for the first chunk include the header in the csv file
 
+    print('==> Starting main processing loop...')
+
     for patient_chunk in gen_chunks:
 
         merged = timeseries_lab.loc[patient_chunk].append(timeseries_resp.loc[patient_chunk], sort=False)

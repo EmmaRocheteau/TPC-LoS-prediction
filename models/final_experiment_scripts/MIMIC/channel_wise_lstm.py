@@ -10,7 +10,7 @@ if __name__=='__main__':
     c['exp_name'] = 'ChannelwiseLSTM'
     c['channelwise'] = True
     c['hidden_size'] = 8
-    c['batch_size'] = 128  # lowered from 512 because of memory issues
+    c['batch_size'] = 256  # lowered from 512 because of memory issues
     c['n_epochs'] = 30
     c['dataset'] = 'MIMIC'
     c['no_diag'] = True

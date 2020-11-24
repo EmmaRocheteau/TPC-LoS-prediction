@@ -9,8 +9,8 @@ def gen_timeseries_file(MIMIC_path, test=False):
 
     print('==> Loading data from timeseries files...')
     if test:
-        timeseries_lab = pd.read_csv(MIMIC_path + 'timeserieslab.csv', nrows=5000000)
-        timeseries = pd.read_csv(MIMIC_path + 'timeseries.csv', nrows=5000000)
+        timeseries_lab = pd.read_csv(MIMIC_path + 'timeserieslab.csv', nrows=500000)
+        timeseries = pd.read_csv(MIMIC_path + 'timeseries.csv', nrows=500000)
     else:
         timeseries_lab = pd.read_csv(MIMIC_path + 'timeserieslab.csv')
         timeseries = pd.read_csv(MIMIC_path + 'timeseries.csv')
@@ -29,25 +29,26 @@ def gen_timeseries_file(MIMIC_path, test=False):
                                         test=test)
     timeseries.columns = timeseries.columns.droplevel()
 
+    # note that in MIMIC the timeseries are a lot messier so there are a lot of variables present that are not useful
     # drop duplicate columns which appear in chartevents
     print('==> Dropping the following columns because they have duplicates in labevents:')
+    cols = []
     for col in timeseries.columns:
         if col in timeseries_lab.columns or col in timeseries_lab.columns + ' (serum)':
-            timeseries.drop(columns=col, inplace=True)
-            print('\t\t' + col)
+            cols.append(col)
     # plus some others which don't quite match up based on strings
-    more_repeats = ['WBC', 'HCO3 (serum)', 'Lactic Acid', 'PH (Arterial)', 'Arterial O2 pressure', 'Arterial CO2 Pressure',
-                    'Arterial Base Excess', 'TCO2 (calc) Arterial', 'Ionized Calcium', 'BUN', 'Calcium non-ionized',
-                    'Anion gap']
-    for col in more_repeats:
-        print('\t\t' + col)
-    timeseries.drop(columns=more_repeats, inplace=True)
+    cols += ['WBC', 'HCO3 (serum)', 'Lactic Acid', 'PH (Arterial)', 'Arterial O2 pressure', 'Arterial CO2 Pressure',
+             'Arterial Base Excess', 'TCO2 (calc) Arterial', 'Ionized Calcium', 'BUN', 'Calcium non-ionized', 'Anion gap']
+    for col in cols:
+        print('\t' + col)
+    timeseries.drop(columns=cols, inplace=True)
 
     # just take a single Braden score, the individual variables will be deleted
     timeseries['Braden Score'] = timeseries[['Braden Activity', 'Braden Friction/Shear', 'Braden Mobility',
                                              'Braden Moisture', 'Braden Nutrition', 'Braden Sensory Perception']].sum(axis=1)
     timeseries['Braden Score'].replace(0, np.nan, inplace=True)  # this is where it hasn't been measured
 
+    # finally remove some binary and less useful variables from the original set
     print('==> Also removing some binary and less useful variables:')
     other = ['18 Gauge Dressing Occlusive', '18 Gauge placed in outside facility', '18 Gauge placed in the field',
              '20 Gauge Dressing Occlusive', '20 Gauge placed in outside facility', '20 Gauge placed in the field',
@@ -63,16 +64,16 @@ def gen_timeseries_file(MIMIC_path, test=False):
              'Orientation to Place', 'Orientation to Time', 'Potassium (whole blood)', 'Skin Care',
              'SpO2 Desat Limit', 'Subglottal Suctioning', 'Ventilator Tank #1', 'Ventilator Tank #2', 'Ventilator Type']
     for col in other:
-        print('\t\t' + col)
+        print('\t' + col)
     timeseries.drop(columns=other, inplace=True)
 
-    #''' Useful code - nice with a breakpoint - for deciding which variables to drop'''
+    #''' Code for deciding which variables to keep - nice with a breakpoint in the indicated position'''
     #import matplotlib.pyplot as plt
     #for col in timeseries.columns:
     #    plt.hist(timeseries[timeseries[col].notnull()][col])
     #    plt.show()
     #    print(col)
-    #    break_point_here = 7
+    #    break_point_here = None
 
     patients = timeseries.index.unique(level=0)
 
@@ -80,6 +81,8 @@ def gen_timeseries_file(MIMIC_path, test=False):
     gen_chunks = gen_patient_chunk(patients, size=size)
     i = size
     header = True  # for the first chunk include the header in the csv file
+
+    print('==> Starting main processing loop...')
 
     for patient_chunk in gen_chunks:
 
