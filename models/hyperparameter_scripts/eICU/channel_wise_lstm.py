@@ -5,7 +5,7 @@ import random
 from models.initialise_arguments import initialise_lstm_arguments
 
 
-if __name__=='__main__':
+def get_hyperparam_config():
 
     c = initialise_lstm_arguments()
     c['mode'] = 'train'
@@ -15,6 +15,11 @@ if __name__=='__main__':
     hidden_size_choice = list(int(x) for x in np.logspace(np.log2(4), np.log2(16), base=2, num=6))
     c['hidden_size'] = random.choice(hidden_size_choice)
 
+    return c
+
+
+if __name__=='__main__':
+    c = get_hyperparam_config()
     log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     channel_wise_lstm = BaselineLSTM(config=c,
                                      n_epochs=c.n_epochs,

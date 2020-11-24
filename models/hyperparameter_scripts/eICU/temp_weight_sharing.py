@@ -5,7 +5,7 @@ import random
 from models.initialise_arguments import initialise_tpc_arguments
 
 
-if __name__=='__main__':
+def get_hyperparam_config():
 
     c = initialise_tpc_arguments()
     c['mode'] = 'train'
@@ -14,8 +14,12 @@ if __name__=='__main__':
     c['share_weights'] = True
 
     temp_kernels_choice = list(int(x) for x in np.logspace(np.log2(16), np.log2(64), base=2, num=9))
-    c['temp_kernels'] = [random.choice(temp_kernels_choice)]*c['n_layers']
+    c['temp_kernels'] = [random.choice(temp_kernels_choice)] * c['n_layers']
 
+    return c
+
+
+if __name__=='__main__':
     log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     temp_weight_share = TPC(config=c,
                             n_epochs=c.n_epochs,

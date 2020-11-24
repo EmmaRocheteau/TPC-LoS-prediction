@@ -5,7 +5,7 @@ import random
 from models.initialise_arguments import initialise_transformer_arguments
 
 
-if __name__=='__main__':
+def get_hyperparam_config():
 
     c = initialise_transformer_arguments()
     c['mode'] = 'train'
@@ -30,6 +30,11 @@ if __name__=='__main__':
     c['feedforward_size'] = random.choice(param_grid['feedforward_size'])
     c['n_heads'] = random.choice(param_grid['n_heads'])
 
+    return c
+
+
+if __name__=='__main__':
+    c = get_hyperparam_config()
     log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     transformer = BaselineTransformer(config=c,
                                       n_epochs=c.n_epochs,

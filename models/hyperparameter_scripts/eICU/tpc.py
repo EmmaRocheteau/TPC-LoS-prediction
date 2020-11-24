@@ -5,7 +5,7 @@ import random
 from models.initialise_arguments import initialise_tpc_arguments
 
 
-if __name__=='__main__':
+def get_hyperparam_config():
 
     c = initialise_tpc_arguments()
     c['mode'] = 'train'
@@ -40,8 +40,8 @@ if __name__=='__main__':
 
     c['n_layers'] = random.choice(param_grid['n_layers'])
     c['kernel_size'] = random.choice(param_grid['kernel_size'][c['n_layers']])
-    c['temp_kernels'] = [random.choice(param_grid['temp_kernels'])]*c['n_layers']
-    c['point_sizes'] = [random.choice(param_grid['point_sizes'])]*c['n_layers']
+    c['temp_kernels'] = [random.choice(param_grid['temp_kernels'])] * c['n_layers']
+    c['point_sizes'] = [random.choice(param_grid['point_sizes'])] * c['n_layers']
     c['batchnorm'] = random.choice(param_grid['batchnorm'])
     c['learning_rate'] = round(random.choice(param_grid['learning_rate']), 5)
     c['batch_size'] = random.choice(param_grid['batch_size'])
@@ -50,6 +50,11 @@ if __name__=='__main__':
     c['last_linear_size'] = random.choice(param_grid['last_linear_size'])
     c['diagnosis_size'] = random.choice(param_grid['diagnosis_size'])
 
+    return c
+
+
+if __name__=='__main__':
+    c = get_hyperparam_config()
     log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
     tpc = TPC(config=c,
               n_epochs=c.n_epochs,

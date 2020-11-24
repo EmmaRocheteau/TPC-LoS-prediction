@@ -20,13 +20,13 @@ eICU Pre-processing
     \i eICU_preprocessing/create_all_tables.sql
     ```
     
+    This step might take a couple of hours.
+    
     To quit the psql console:
     
     ```
     \q
     ```
-    
-    This step might take a couple of hours.
     
 5) Then run the pre-processing scripts in your terminal. This will need to run overnight:
 
