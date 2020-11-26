@@ -42,7 +42,7 @@ def get_hyperparam_config():
     c['kernel_size'] = random.choice(param_grid['kernel_size'][c['n_layers']])
     c['temp_kernels'] = [random.choice(param_grid['temp_kernels'])] * c['n_layers']
     c['point_sizes'] = [random.choice(param_grid['point_sizes'])] * c['n_layers']
-    c['batchnorm'] = random.choice(param_grid['batchnorm'])
+    #c['batchnorm'] = random.choice(param_grid['batchnorm'])
     c['learning_rate'] = round(random.choice(param_grid['learning_rate']), 5)
     c['batch_size'] = random.choice(param_grid['batch_size'])
     c['main_dropout_rate'] = random.choice(param_grid['main_dropout_rate'])
