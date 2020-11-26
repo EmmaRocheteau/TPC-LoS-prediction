@@ -100,7 +100,7 @@ TPC | 3.21 | 61.2 | 65.8 | 0.44 | 0.15 | 0.73
     python eICU_preprocessing/run_all_preprocessing.py
     ```
     
-### MIMIC pre-processing
+### MIMIC-IV pre-processing
 1) To run the sql files you must have the MIMIC-IV database set up: https://physionet.org/content/mimiciv/0.4/. 
 
 2) The official recommended way to access MIMIC-IV is via BigQuery: https://mimic-iv.mit.edu/docs/access/bigquery/. Personally I did not find it easy to store the necessary views and there is a 1GB size limit on the data you can download in the free tier, which is less than I am using here (the largest file to extract is timeseries.csv which is 4.49GB). However if you do wish to use BigQuery, note that you will have to make minor modifications to the code e.g. you would need to replace a reference to the table `patients` with `physionet-data.mimic_core.patients`. 
