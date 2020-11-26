@@ -50,14 +50,16 @@ Our model (TPC) significantly outperforms all baselines by large margins.
 
 ### MIMIC-IV
 
-Results coming soon! These are preliminary. Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
+Results coming soon! These are preliminary (not hyperparameter optimised). Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
 
 Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
 Mean* | 5.24 | 474.9 | 77.7 | 2.80 | 0.00 | 0.00
 Median* | 4.60 | 216.8 | 86.8 | 2.09 | -0.12 | 0.00
 LSTM | 3.86 | 114.8 | 72.3 | 1.36 | 0.07 | 0.37
+CW LSTM | 3.71 | 114.1 | 68.9 | 1.24 | 0.11 | 0.40
 Transformer | 3.78 | 120.4 | 69.8 | 1.29 | 0.10 | 0.39
+TPC | 3.21 | 61.2 | 65.8 | 0.44 | 0.15 | 0.73
 
 *The mean and median "models" always predict 5.7 and 2.7 days respectively (the mean and median of the training set).
 
