@@ -3,6 +3,7 @@ from torch.optim import Adam
 from models.transformer_model import Transformer
 from models.experiment_template import ExperimentTemplate
 from models.initialise_arguments import initialise_transformer_arguments
+from models.final_experiment_scripts.best_hyperparameters import best_transformer
 
 
 class BaselineTransformer(ExperimentTemplate):
@@ -21,9 +22,10 @@ class BaselineTransformer(ExperimentTemplate):
 if __name__=='__main__':
 
     c = initialise_transformer_arguments()
-    c['mode'] = 'test'
     c['exp_name'] = 'TransformerLabsOnly'
+    c['dataset'] = 'eICU'
     c['labs_only'] = True
+    c = best_transformer(c)
 
     log_folder_path = create_folder('models/experiments/final/eICU', c.exp_name)
     transformer = BaselineTransformer(config=c,

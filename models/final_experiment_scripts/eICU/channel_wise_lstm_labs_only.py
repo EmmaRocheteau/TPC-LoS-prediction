@@ -3,6 +3,7 @@ from torch.optim import Adam
 from models.lstm_model import BaseLSTM
 from models.experiment_template import ExperimentTemplate
 from models.initialise_arguments import initialise_lstm_arguments
+from models.final_experiment_scripts.best_hyperparameters import best_cw_lstm
 
 
 class BaselineLSTM(ExperimentTemplate):
@@ -20,12 +21,10 @@ class BaselineLSTM(ExperimentTemplate):
 if __name__=='__main__':
 
     c = initialise_lstm_arguments()
-    c['mode'] = 'test'
     c['exp_name'] = 'ChannelwiseLSTMLabsOnly'
-    c['channelwise'] = True
-    c['hidden_size'] = 8
-    c['n_epochs'] = 30
+    c['dataset'] = 'eICU'
     c['labs_only'] = True
+    c = best_cw_lstm(c)
 
     log_folder_path = create_folder('models/experiments/final/eICU', c.exp_name)
     channelwise_lstm = BaselineLSTM(config=c,

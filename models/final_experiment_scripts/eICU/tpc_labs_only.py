@@ -3,6 +3,7 @@ from torch.optim import Adam
 from models.tpc_model import TempPointConv
 from models.experiment_template import ExperimentTemplate
 from models.initialise_arguments import initialise_tpc_arguments
+from models.final_experiment_scripts.best_hyperparameters import best_tpc
 
 
 class TPC(ExperimentTemplate):
@@ -20,10 +21,10 @@ class TPC(ExperimentTemplate):
 if __name__=='__main__':
 
     c = initialise_tpc_arguments()
-    c['mode'] = 'test'
     c['exp_name'] = 'TPCLabsOnly'
-    c['model_type'] = 'tpc'
+    c['dataset'] = 'eICU'
     c['labs_only'] = True
+    c = best_tpc(c)
 
     log_folder_path = create_folder('models/experiments/final/eICU', c.exp_name)
     tpc = TPC(config=c,

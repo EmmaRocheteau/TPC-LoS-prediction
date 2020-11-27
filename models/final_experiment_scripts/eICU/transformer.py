@@ -1,13 +1,15 @@
 from eICU_preprocessing.split_train_test import create_folder
 from models.run_transformer import BaselineTransformer
 from models.initialise_arguments import initialise_transformer_arguments
+from models.final_experiment_scripts.best_hyperparameters import best_transformer
 
 
 if __name__=='__main__':
 
     c = initialise_transformer_arguments()
-    c['mode'] = 'test'
     c['exp_name'] = 'Transformer'
+    c['dataset'] = 'eICU'
+    c = best_transformer(c)
 
     log_folder_path = create_folder('models/experiments/final/eICU', c.exp_name)
     transformer = BaselineTransformer(config=c,

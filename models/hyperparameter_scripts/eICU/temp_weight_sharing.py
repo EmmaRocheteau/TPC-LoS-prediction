@@ -21,10 +21,15 @@ def get_hyperparam_config():
 
 if __name__=='__main__':
 
-    log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
-    temp_weight_share = TPC(config=c,
-                            n_epochs=c.n_epochs,
-                            name=c.exp_name,
-                            base_dir=log_folder_path,
-                            explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
-    temp_weight_share.run()
+    for i in range(10):
+        try:
+            log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
+            temp_weight_share = TPC(config=c,
+                                    n_epochs=c.n_epochs,
+                                    name=c.exp_name,
+                                    base_dir=log_folder_path,
+                                    explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
+            temp_weight_share.run()
+
+        except RuntimeError:
+            continue

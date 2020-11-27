@@ -1,15 +1,16 @@
 from eICU_preprocessing.split_train_test import create_folder
 from models.run_lstm import BaselineLSTM
 from models.initialise_arguments import initialise_lstm_arguments
+from models.final_experiment_scripts.best_hyperparameters import best_lstm
 
 
 if __name__=='__main__':
 
     c = initialise_lstm_arguments()
-    c['mode'] = 'test'
     c['exp_name'] = 'StandardLSTM12.5'
+    c['dataset'] = 'eICU'
     c['percentage_data'] = 12.5
-    c['n_epochs'] = 4
+    c = best_lstm(c)
 
     log_folder_path = create_folder('models/experiments/final/eICU', c.exp_name)
     baseline_lstm = BaselineLSTM(config=c,
