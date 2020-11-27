@@ -31,8 +31,4 @@ if __name__=='__main__':
               name=c.exp_name,
               base_dir=log_folder_path,
               explogger_kwargs={'folder_format': '%Y-%m-%d_%H%M%S{run_number}'})
-
-    if c.mode == 'train':
-        tpc.run()
-    if c.mode == 'test':
-        tpc.run_test()
+    tpc.run()

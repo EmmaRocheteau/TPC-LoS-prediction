@@ -10,6 +10,7 @@ def get_hyperparam_config():
     c = initialise_tpc_arguments()
     c['mode'] = 'train'
     c['exp_name'] = 'TempWeightShare'
+    c['dataset'] = 'eICU'
     c['model_type'] = 'temp_only'
     c['share_weights'] = True
 

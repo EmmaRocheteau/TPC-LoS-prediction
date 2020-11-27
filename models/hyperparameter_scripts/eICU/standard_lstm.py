@@ -10,6 +10,7 @@ def get_hyperparam_config():
     c = initialise_lstm_arguments()
     c['mode'] = 'train'
     c['exp_name'] = 'StandardLSTM'
+    c['dataset'] = 'eICU'
 
     # hyper-parameter grid
     param_grid = {

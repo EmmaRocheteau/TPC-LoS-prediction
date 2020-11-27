@@ -10,6 +10,7 @@ def get_hyperparam_config():
     c = initialise_lstm_arguments()
     c['mode'] = 'train'
     c['exp_name'] = 'ChannelwiseLSTM'
+    c['dataset'] = 'eICU'
     c['channelwise'] = True
 
     hidden_size_choice = list(int(x) for x in np.logspace(np.log2(4), np.log2(16), base=2, num=6))

@@ -10,6 +10,7 @@ def get_hyperparam_config():
     c = initialise_transformer_arguments()
     c['mode'] = 'train'
     c['exp_name'] = 'Transformer'
+    c['dataset'] = 'eICU'
 
     # hyper-parameter grid
     param_grid = {
