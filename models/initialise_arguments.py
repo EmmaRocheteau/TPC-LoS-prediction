@@ -1,6 +1,8 @@
 from trixi.util import Config
 import argparse
 
+# all default values stated here are the best hyperparameters in the eICU dataset, not MIMIC
+
 def initialise_arguments():
     parser = argparse.ArgumentParser()
 
@@ -8,7 +10,7 @@ def initialise_arguments():
     parser.add_argument('--dataset', default='eICU', type=str)
     parser.add_argument('-disable_cuda', action='store_true')
     parser.add_argument('-intermediate_reporting', action='store_true')
-    parser.add_argument('--batch_size_test', default=64, type=int)
+    parser.add_argument('--batch_size_test', default=32, type=int)
     parser.add_argument('-shuffle_train', action='store_true')
     parser.add_argument('-save_results_csv', action='store_true')
     parser.add_argument('--percentage_data', default=100.0, type=float)
