@@ -163,7 +163,7 @@ TPC | 3.21 | 61.2 | 65.8 | 0.44 | 0.15 | 0.73
     Trixi provides a useful way to visualise effects of the hyperparameters (after running the following command, navigate to http://localhost:8080 in your browser):
     
     ```
-    python -m trixi.browser --port 8080 experiments/hyperparameters/eICU/TPC
+    python -m trixi.browser --port 8080 models/experiments/hyperparameters/eICU/TPC
     ```
     
     The final experiments for the paper are found in models/final_experiment_scripts e.g.:
