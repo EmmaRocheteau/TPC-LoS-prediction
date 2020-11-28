@@ -24,6 +24,8 @@ The pressure of ever-increasing patient demand and budget restrictions make hosp
 
 ## Headline Results
 
+### Length of Stay Prediction
+
 We report on the following metrics: 
 - Mean absolute deviation (MAD)
 - Mean absolute percentage error (MAPE)
@@ -62,6 +64,14 @@ Transformer | 3.78 | 120.4 | 69.8 | 1.29 | 0.10 | 0.39
 TPC | 3.21 | 61.2 | 65.8 | 0.44 | 0.15 | 0.73
 
 *The mean and median "models" always predict 5.7 and 2.7 days respectively (the mean and median of the training set).
+
+### Mortality Prediction
+
+Results coming soon.
+
+### Multitask Prediction
+
+Results coming soon.
 
 ## Implementation Instructions
 
