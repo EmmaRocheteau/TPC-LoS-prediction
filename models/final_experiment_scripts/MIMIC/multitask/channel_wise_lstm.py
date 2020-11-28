@@ -9,10 +9,10 @@ if __name__=='__main__':
     c = initialise_lstm_arguments()
     c['exp_name'] = 'ChannelwiseLSTM'
     c['dataset'] = 'MIMIC'
-    c['task'] = 'mortality'
+    c['task'] = 'multitask'
     c = best_cw_lstm(c)
 
-    log_folder_path = create_folder('models/experiments/final/MIMIC/mortality', c.exp_name)
+    log_folder_path = create_folder('models/experiments/final/MIMIC/multitask', c.exp_name)
     channelwise_lstm = BaselineLSTM(config=c,
                                     n_epochs=c.n_epochs,
                                     name=c.exp_name,
