@@ -15,6 +15,10 @@ def initialise_arguments():
     parser.add_argument('-save_results_csv', action='store_true')
     parser.add_argument('--percentage_data', default=100.0, type=float)
     parser.add_argument('--task', default='LoS', type=str, help='can be either LoS, mortality, or multitask (both)')
+    parser.add_argument('--mode', default='train', type=str, help='can be either train, which reports intermediate '
+                                                                  'results on the training and validation sets each '
+                                                                  'epoch, or test, which just runs all the epochs and '
+                                                                  'only reports on the test set')
 
     # loss
     parser.add_argument('--loss', default='msle', type=str, help='can either be msle or mse')

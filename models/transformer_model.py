@@ -75,6 +75,7 @@ class Transformer(nn.Module):
         # The flat data will be of dimensions B * no_flat_features
 
         super(Transformer, self).__init__()
+        self.task = config.task
         self.d_model = config.d_model
         self.n_layers = config.n_layers
         self.n_heads = config.n_heads
@@ -94,11 +95,13 @@ class Transformer(nn.Module):
         self.no_diag = config.no_diag
 
         self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
         self.hardtanh = nn.Hardtanh(min_val=1 / 48, max_val=100)  # keep the end predictions between half an hour and 100 days
         self.trans_dropout = nn.Dropout(p=self.trans_dropout_rate)
         self.main_dropout = nn.Dropout(p=self.main_dropout_rate)
         self.msle_loss = MSLELoss()
         self.mse_loss = MSELoss()
+        self.bce_loss = nn.BCELoss()
 
         self.empty_module = EmptyModule()
         self.remove_none = lambda x: tuple(xi for xi in x if xi is not None)
@@ -125,19 +128,24 @@ class Transformer(nn.Module):
         input_size = self.d_model + self.diagnosis_size + self.no_flat_features
         if self.no_diag:
             input_size = input_size - self.diagnosis_size
-        self.point = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_los = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_mort = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
 
         # input shape: (B * T) * last_linear_size
         if self.batchnorm in ['mybatchnorm', 'pointonly', 'low_momentum']:
-            self.bn_point_last = MyBatchNorm1d(num_features=self.last_linear_size, momentum=self.momentum)
+            self.bn_point_last_los = MyBatchNorm1d(num_features=self.last_linear_size, momentum=self.momentum)
+            self.bn_point_last_mort = MyBatchNorm1d(num_features=self.last_linear_size, momentum=self.momentum)
         elif self.batchnorm == 'default':
-            self.bn_point_last = nn.BatchNorm1d(num_features=self.last_linear_size)
+            self.bn_point_last_los = nn.BatchNorm1d(num_features=self.last_linear_size)
+            self.bn_point_last_mort = nn.BatchNorm1d(num_features=self.last_linear_size)
         else:
-            self.bn_point_last = self.empty_module
+            self.bn_point_last_los = self.empty_module
+            self.bn_point_last_mort = self.empty_module
 
         # input shape: (B * T) * last_linear_size
         # output shape: (B * T) * 1
-        self.point_final = nn.Linear(in_features=self.last_linear_size, out_features=1)
+        self.point_final_los = nn.Linear(in_features=self.last_linear_size, out_features=1)
+        self.point_final_mort = nn.Linear(in_features=self.last_linear_size, out_features=1)
 
         return
 
@@ -165,19 +173,31 @@ class Transformer(nn.Module):
                                      diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
                                      X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
 
-        last_point = self.relu(self.main_dropout(self.bn_point_last(self.point(combined_features))))
+        last_point_los = self.relu(self.main_dropout(self.bn_point_last_los(self.point_los(combined_features))))
+        last_point_mort = self.relu(self.main_dropout(self.bn_point_last_mort(self.point_mort(combined_features))))
 
         if self.no_exp:
-            predictions = self.hardtanh(self.point_final(last_point).view(B, T - 5))  # B * (T - 5)
+            los_predictions = self.hardtanh(self.point_final_los(last_point_los).view(B, T - 5))  # B * (T - 5)
         else:
-            predictions = self.hardtanh(exp(self.point_final(last_point).view(B, T - 5)))  # B * (T - 5)
+            los_predictions = self.hardtanh(exp(self.point_final_los(last_point_los).view(B, T - 5)))  # B * (T - 5)
+        mort_predictions = self.sigmoid(self.point_final_mort(last_point_mort).view(B, T - 5))  # B * (T - 5)
 
-        return predictions
+        return los_predictions, mort_predictions
 
-    def loss(self, y_hat, y, mask, seq_lengths, device, sum_losses, loss_type):
-        bool_type = torch.cuda.BoolTensor if device == torch.device('cuda') else torch.BoolTensor
-        if loss_type == 'msle':
-            loss = self.msle_loss(y_hat, y, mask.type(bool_type), seq_lengths, sum_losses)
-        elif loss_type == 'mse':
-            loss = self.mse_loss(y_hat, y, mask.type(bool_type), seq_lengths, sum_losses)
+    def loss(self, y_hat_los, y_hat_mort, y_los, y_mort, mask, seq_lengths, device, sum_losses, loss_type, alpha=0.5):
+        # mort loss
+        if self.task == 'mortality':
+            loss = self.bce_loss(y_hat_mort, y_mort)
+        # los loss
+        else:
+            bool_type = torch.cuda.BoolTensor if device == torch.device('cuda') else torch.BoolTensor
+            if loss_type == 'msle':
+                los_loss = self.msle_loss(y_hat_los, y_los, mask.type(bool_type), seq_lengths, sum_losses)
+            elif loss_type == 'mse':
+                los_loss = self.mse_loss(y_hat_los, y_los, mask.type(bool_type), seq_lengths, sum_losses)
+            if self.task == 'LoS':
+                loss = los_loss
+            # multitask loss
+            if self.task == 'multitask':
+                loss = los_loss + self.bce_loss(y_hat_mort, y_mort) * alpha
         return loss

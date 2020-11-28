@@ -34,6 +34,12 @@ def best_lstm(c):
             c['n_epochs'] = 8
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
+        c['batch_size'] = 32
+        c['n_layers'] = 1
+        c['hidden_size'] = 128
+        c['learning_rate'] = 0.00163
+        c['lstm_dropout_rate'] = 0.25
+        c['n_epochs'] = 8
     return c
 
 def best_cw_lstm(c):

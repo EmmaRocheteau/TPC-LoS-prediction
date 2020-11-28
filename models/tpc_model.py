@@ -100,6 +100,7 @@ class TempPointConv(nn.Module):
         # The flat data will be of dimensions B * no_flat_features
 
         super(TempPointConv, self).__init__()
+        self.task = config.task
         self.n_layers = config.n_layers
         self.model_type = config.model_type
         self.share_weights = config.share_weights
@@ -121,9 +122,11 @@ class TempPointConv(nn.Module):
         self.momentum = 0.01 if self.batchnorm == 'low_momentum' else 0.1
 
         self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
         self.hardtanh = nn.Hardtanh(min_val=1/48, max_val=100)  # keep the end predictions between half an hour and 100 days
         self.msle_loss = MSLELoss()
         self.mse_loss = MSELoss()
+        self.bce_loss = nn.BCELoss()
 
         self.main_dropout = nn.Dropout(p=self.main_dropout_rate)
         self.temp_dropout = nn.Dropout(p=self.temp_dropout_rate)
@@ -142,14 +145,17 @@ class TempPointConv(nn.Module):
 
         if self.batchnorm in ['mybatchnorm', 'pointonly', 'low_momentum', 'default']:
             self.bn_diagnosis_encoder = self.batchnormclass(num_features=self.diagnosis_size, momentum=self.momentum)  # input shape: B * diagnosis_size
-            self.bn_point_last = self.batchnormclass(num_features=self.last_linear_size, momentum=self.momentum)  # input shape: (B * T) * last_linear_size
+            self.bn_point_last_los = self.batchnormclass(num_features=self.last_linear_size, momentum=self.momentum)  # input shape: (B * T) * last_linear_size
+            self.bn_point_last_mort = self.batchnormclass(num_features=self.last_linear_size, momentum=self.momentum)  # input shape: (B * T) * last_linear_size
         else:
             self.bn_diagnosis_encoder = self.empty_module
-            self.bn_point_last = self.empty_module
+            self.bn_point_last_los = self.empty_module
+            self.bn_point_last_mort = self.empty_module
 
         # input shape: (B * T) * last_linear_size
         # output shape: (B * T) * 1
-        self.point_final = nn.Linear(in_features=self.last_linear_size, out_features=1)
+        self.point_final_los = nn.Linear(in_features=self.last_linear_size, out_features=1)
+        self.point_final_mort = nn.Linear(in_features=self.last_linear_size, out_features=1)
 
         if self.model_type == 'tpc':
             self.init_tpc()
@@ -181,7 +187,8 @@ class TempPointConv(nn.Module):
             input_size = input_size - self.diagnosis_size
         if self.no_skip_connections:
             input_size = self.F * self.Y + self.Z + self.diagnosis_size + self.no_flat_features
-        self.point_last = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_last_los = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_last_mort = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
 
         return
 
@@ -201,7 +208,8 @@ class TempPointConv(nn.Module):
         # input shape: (B * T) * (F * (1 + Y) + diagnosis_size + no_flat_features)
         # output shape: (B * T) * last_linear_size
         input_size = self.F * (1 + self.Y) + self.diagnosis_size + self.no_flat_features
-        self.point_last = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_last_los = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_last_mort = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
         return
 
 
@@ -222,7 +230,8 @@ class TempPointConv(nn.Module):
             input_size = self.Zt + self.F + 2 + self.no_flat_features + self.diagnosis_size
         else:
             input_size = self.Zt + 2 * self.F + 2 + self.no_flat_features + self.diagnosis_size
-        self.point_last = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_last_los = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
+        self.point_last_mort = nn.Linear(in_features=input_size, out_features=self.last_linear_size)
 
         return
 
@@ -478,14 +487,16 @@ class TempPointConv(nn.Module):
                                      diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
                                      next_X[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)  # (B * (T - 5)) * (((F + Zt) * (1 + Y)) + diagnosis_size + no_flat_features) for tpc
 
-        last_point = self.relu(self.main_dropout(self.bn_point_last(self.point_last(combined_features))))
+        last_point_los = self.relu(self.main_dropout(self.bn_point_last_los(self.point_last_los(combined_features))))
+        last_point_mort = self.relu(self.main_dropout(self.bn_point_last_mort(self.point_last_mort(combined_features))))
 
         if self.no_exp:
-            predictions = self.hardtanh(self.point_final(last_point).view(B, T - 5))  # B * (T - 5)
+            los_predictions = self.hardtanh(self.point_final_los(last_point_los).view(B, T - 5))  # B * (T - 5)
         else:
-            predictions = self.hardtanh(exp(self.point_final(last_point).view(B, T - 5)))  # B * (T - 5)
+            los_predictions = self.hardtanh(exp(self.point_final_los(last_point_los).view(B, T - 5)))  # B * (T - 5)
+        mort_predictions = self.sigmoid(self.point_final_mort(last_point_mort).view(B, T - 5))  # B * (T - 5)
 
-        return predictions
+        return los_predictions, mort_predictions
 
 
     def temp_pointwise(self, B=None, T=None, X=None, repeat_flat=None, X_orig=None, temp=None, bn_temp=None, point=None,
@@ -645,10 +656,20 @@ class TempPointConv(nn.Module):
                 point_output)  # (B * T) * point_size
 
 
-    def loss(self, y_hat, y, mask, seq_lengths, device, sum_losses, loss_type):
-        bool_type = torch.cuda.BoolTensor if device == torch.device('cuda') else torch.BoolTensor
-        if loss_type == 'msle':
-            loss = self.msle_loss(y_hat, y, mask.type(bool_type), seq_lengths, sum_losses)
-        elif loss_type == 'mse':
-            loss = self.mse_loss(y_hat, y, mask.type(bool_type), seq_lengths, sum_losses)
+    def loss(self, y_hat_los, y_hat_mort, y_los, y_mort, mask, seq_lengths, device, sum_losses, loss_type, alpha=0.5):
+        # mort loss
+        if self.task == 'mortality':
+            loss = self.bce_loss(y_hat_mort, y_mort)
+        # los loss
+        else:
+            bool_type = torch.cuda.BoolTensor if device == torch.device('cuda') else torch.BoolTensor
+            if loss_type == 'msle':
+                los_loss = self.msle_loss(y_hat_los, y_los, mask.type(bool_type), seq_lengths, sum_losses)
+            elif loss_type == 'mse':
+                los_loss = self.mse_loss(y_hat_los, y_los, mask.type(bool_type), seq_lengths, sum_losses)
+            if self.task == 'LoS':
+                loss = los_loss
+            # multitask loss
+            if self.task == 'multitask':
+                loss = los_loss + self.bce_loss(y_hat_mort, y_mort) * alpha
         return loss

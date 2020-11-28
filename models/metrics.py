@@ -25,6 +25,7 @@ def mean_squared_logarithmic_error(y_true, y_pred):
     return np.mean(np.square(np.log(y_true/y_pred)))
 
 def print_metrics_regression(y_true, predictions, verbose=1, elog=None):
+    print('==> Length of Stay:')
     y_true_bins = [get_bin_custom(x, CustomBins.nbins) for x in y_true]
     prediction_bins = [get_bin_custom(x, CustomBins.nbins) for x in predictions]
     cf = metrics.confusion_matrix(y_true_bins, prediction_bins)
@@ -53,9 +54,11 @@ def print_metrics_regression(y_true, predictions, verbose=1, elog=None):
     return [mad, mse, mape, msle, r2, kappa]
 
 
-def print_metrics_mortality(y_true, predictions, verbose=1, elog=None):
-    predictions = np.array(predictions)
-    predictions = predictions.argmax(axis=1)
+def print_metrics_mortality(y_true, prediction_probs, verbose=1, elog=None):
+    print('==> Mortality:')
+    prediction_probs = np.array(prediction_probs)
+    prediction_probs = np.transpose(np.append([1 - prediction_probs], [prediction_probs], axis=0))
+    predictions = prediction_probs.argmax(axis=1)
     cf = metrics.confusion_matrix(y_true, predictions, labels=range(2))
     if elog is not None:
         elog.print('Confusion matrix:')
@@ -71,15 +74,16 @@ def print_metrics_mortality(y_true, predictions, verbose=1, elog=None):
     rec0 = cf[0][0] / (cf[0][0] + cf[0][1])
     rec1 = cf[1][1] / (cf[1][1] + cf[1][0])
 
-    auroc = metrics.roc_auc_score(y_true, predictions[:, 1])
-    (precisions, recalls, thresholds) = metrics.precision_recall_curve(y_true, predictions[:, 1])
+    auroc = metrics.roc_auc_score(y_true, prediction_probs[:, 1])
+    (precisions, recalls, thresholds) = metrics.precision_recall_curve(y_true, prediction_probs[:, 1])
     auprc = metrics.auc(recalls, precisions)
     f1macro = metrics.f1_score(y_true, predictions, average='macro')
 
-    results = {"acc": acc, "prec0": prec0, "prec1": prec1, "rec0": rec0, "rec1": rec1,
-               "auroc": auroc, "auprc": auprc, "f1macro": f1macro}
+    results = {'Accuracy': acc, 'Precision Survived': prec0, 'Precision Died': prec1, 'Recall Survived': rec0,
+               'Recall Died': rec1, 'Area Under the Receiver Operating Characteristic curve (AUROC)': auroc,
+               'Area Under the Precision Recall curve (AUPRC)': auprc, 'F1 score (macro averaged)': f1macro}
     if verbose:
         for key in results:
-            print("{}: {:.4f}".format(key, results[key]))
+            print('{} = {}'.format(key, results[key]))
 
     return [acc, prec0, prec1, rec0, rec1, auroc, auprc, f1macro]
