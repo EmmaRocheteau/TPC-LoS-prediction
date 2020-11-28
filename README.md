@@ -36,7 +36,7 @@ We report on the following metrics:
 
 For the first four metrics, lower is better. For the last two, higher is better.
 
-### eICU
+#### eICU
 
 Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
@@ -50,7 +50,7 @@ TPC | 1.78±0.02 | 63.5±4.3 | 21.7±0.5 | 0.70±0.03 | 0.27±0.02 | 0.58±0.01
 Our model (TPC) significantly outperforms all baselines by large margins. 
 *The mean and median "models" always predict 3.5 and 1.7 days respectively (the mean and median of the training set).
 
-### MIMIC-IV
+#### MIMIC-IV
 
 Results coming soon! These are preliminary (not hyperparameter optimised). Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
 
