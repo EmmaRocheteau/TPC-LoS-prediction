@@ -14,7 +14,7 @@ def sig_ttest(list_results1, list_results2):
         print(stars)
     return
 
-def get_metrics(exp_dir):
+def get_metrics_los(exp_dir):
     print('Experiment: {}'.format(exp_dir))
     stats = pd.read_csv('models/experiments/final/' + exp_dir + '/results.csv', header=None)
     stats.columns =['mad', 'mse', 'mape', 'msle', 'r2', 'kappa']
@@ -25,8 +25,8 @@ def get_metrics(exp_dir):
 
 if __name__=='__main__':
     path = '/models/experiments/final/'
-    exp1 = get_metrics('TPC')
-    exp2 = get_metrics('TPCNoDecay')
+    exp1 = get_metrics_los('TPC')
+    exp2 = get_metrics_los('TPCNoDecay')
 
     for param in exp1.columns:
         print(param)

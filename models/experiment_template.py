@@ -3,7 +3,7 @@ from eICU_preprocessing.reader import eICUReader
 from MIMIC_preprocessing.reader import MIMICReader
 from eICU_preprocessing.split_train_test import create_folder
 import numpy as np
-from models.metrics import print_metrics_regression
+from models.metrics import print_metrics_regression, print_metrics_mortality
 from trixi.experiment.pytorchexperiment import PytorchExperiment
 import os
 from models.shuffle_train import shuffle_train
@@ -88,8 +88,10 @@ class ExperimentTemplate(PytorchExperiment):
             shuffle_train(self.config.eICU_path + 'train')  # shuffle the order of the training data to make the batches different, this takes a bit of time
         train_batches = self.train_datareader.batch_gen(batch_size=self.config.batch_size)
         train_loss = []
-        train_y_hat = np.array([])
-        train_y = np.array([])
+        train_y_hat_los = np.array([])
+        train_y_los = np.array([])
+        train_y_hat_mort = np.array([])
+        train_y_mort = np.array([])
 
         for batch_idx, batch in enumerate(train_batches):
 
@@ -98,20 +100,25 @@ class ExperimentTemplate(PytorchExperiment):
 
             # unpack batch
             if self.config.dataset == 'MIMIC':
-                padded, mask, flat, labels, seq_lengths = batch
+                padded, mask, flat, los_labels, mort_labels, seq_lengths = batch
                 diagnoses = None
             else:
-                padded, mask, diagnoses, flat, labels, seq_lengths = batch
+                padded, mask, diagnoses, flat, los_labels, mort_labels, seq_lengths = batch
 
             self.optimiser.zero_grad()
-            y_hat = self.model(padded, diagnoses, flat)
-            loss = self.model.loss(y_hat, labels, mask, seq_lengths, self.device, self.config.sum_losses, self.config.loss)
+            y_hat_los, y_hat_mort = self.model(padded, diagnoses, flat)
+            loss = self.model.loss(y_hat_los, y_hat_mort, los_labels, mort_labels, mask, seq_lengths, self.device,
+                                   self.config.sum_losses, self.config.loss)
             loss.backward()
             self.optimiser.step()
             train_loss.append(loss.item())
 
-            train_y_hat = np.append(train_y_hat, self.remove_padding(y_hat, mask.type(self.bool_type)))
-            train_y = np.append(train_y, self.remove_padding(labels, mask.type(self.bool_type)))
+            if self.config.task in ('LoS', 'multitask'):
+                train_y_hat_los = np.append(train_y_hat_los, self.remove_padding(y_hat_los, mask.type(self.bool_type)))
+                train_y_los = np.append(train_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
+            if self.config.task in ('mortality', 'multitask'):
+                train_y_hat_mort = np.append(train_y_hat_mort, self.remove_padding(y_hat_mort, mask.type(self.bool_type)))
+                train_y_mort = np.append(train_y_mort, self.remove_padding(mort_labels, mask.type(self.bool_type)))
 
             if self.config.intermediate_reporting and batch_idx % self.config.log_interval == 0 and batch_idx != 0:
 
@@ -130,9 +137,14 @@ class ExperimentTemplate(PytorchExperiment):
 
             print('Train Metrics:')
             mean_train_loss = sum(train_loss) / len(train_loss)
-            metrics_list = print_metrics_regression(train_y, train_y_hat, elog=self.elog) # order: mad, mse, mape, msle, r2, kappa
-            for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], metrics_list):
-                self.add_result(value=metric, name='train_' + metric_name, counter=epoch)
+            if self.config.task in ('LoS', 'multitask'):
+                los_metrics_list = print_metrics_regression(train_y_los, train_y_hat_los, elog=self.elog) # order: mad, mse, mape, msle, r2, kappa
+                for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], los_metrics_list):
+                    self.add_result(value=metric, name='train_' + metric_name, counter=epoch)
+            if self.config.task in ('mortality', 'multitask'):
+                mort_metrics_list = print_metrics_mortality(train_y_mort, train_y_hat_mort, elog=self.elog)
+                for metric_name, metric in zip(['acc', 'prec0', 'prec1', 'rec0', 'rec1', 'auroc', 'auprc', 'f1macro'], mort_metrics_list):
+                    self.add_result(value=metric, name='train_' + metric_name, counter=epoch)
             self.elog.print('Epoch: {} | Train Loss: {:3.4f}'.format(epoch, mean_train_loss))
 
         if self.config.mode == 'test':
@@ -142,9 +154,14 @@ class ExperimentTemplate(PytorchExperiment):
             if self.config.mode == 'train':
                 self.save_checkpoint(name='checkpoint', n_iter=epoch)
             if self.config.save_results_csv:
-                self.elog.save_to_csv(np.vstack((train_y_hat, train_y)).transpose(),
-                                      'train_predictions/epoch{}.csv'.format(epoch),
-                                      header='predictions, label')
+                if self.config.task in ('LoS', 'multitask'):
+                    self.elog.save_to_csv(np.vstack((train_y_hat_los, train_y_los)).transpose(),
+                                          'train_predictions_los/epoch{}.csv'.format(epoch),
+                                          header='los_predictions, label')
+                if self.config.task in ('mortality', 'multitask'):
+                    self.elog.save_to_csv(np.vstack((train_y_hat_mort, train_y_mort)).transpose(),
+                                          'train_predictions_mort/epoch{}.csv'.format(epoch),
+                                          header='mort_predictions, label')
 
         return
 
@@ -152,45 +169,60 @@ class ExperimentTemplate(PytorchExperiment):
 
         if self.config.mode == 'train':
             self.model.eval()
-            #if self.config.train_as_val:
-            #    val_batches = self.train_datareader.batch_gen(batch_size=self.config.batch_size)
-            #else:
-            #    val_batches = self.val_datareader.batch_gen(batch_size=self.config.batch_size_test)
             val_batches = self.val_datareader.batch_gen(batch_size=self.config.batch_size_test)
             val_loss = []
-            val_y_hat = np.array([])
-            val_y = np.array([])
+            val_y_hat_los = np.array([])
+            val_y_los = np.array([])
+            val_y_hat_mort = np.array([])
+            val_y_mort = np.array([])
 
             for batch in val_batches:
 
                 # unpack batch
                 if self.config.dataset == 'MIMIC':
-                    padded, mask, flat, labels, seq_lengths = batch
+                    padded, mask, flat, los_labels, mort_labels, seq_lengths = batch
                     diagnoses = None
                 else:
-                    padded, mask, diagnoses, flat, labels, seq_lengths = batch
+                    padded, mask, diagnoses, flat, los_labels, mort_labels, seq_lengths = batch
 
-                y_hat = self.model(padded, diagnoses, flat)
-                loss = self.model.loss(y_hat, labels, mask, seq_lengths, self.device, self.config.sum_losses, self.config.loss)
+                y_hat_los, y_hat_mort = self.model(padded, diagnoses, flat)
+                loss = self.model.loss(y_hat_los, y_hat_mort, los_labels, mort_labels, mask, seq_lengths, self.device,
+                                       self.config.sum_losses, self.config.loss)
                 val_loss.append(loss.item())  # can't add the model.loss directly because it causes a memory leak
 
-                val_y_hat = np.append(val_y_hat, self.remove_padding(y_hat, mask.type(self.bool_type)))
-                val_y = np.append(val_y, self.remove_padding(labels, mask.type(self.bool_type)))
+                if self.config.task in ('LoS', 'multitask'):
+                    val_y_hat_los = np.append(val_y_hat_los,
+                                                self.remove_padding(y_hat_los, mask.type(self.bool_type)))
+                    val_y_los = np.append(val_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
+                if self.config.task in ('mortality', 'multitask'):
+                    val_y_hat_mort = np.append(val_y_hat_mort,
+                                                 self.remove_padding(y_hat_mort, mask.type(self.bool_type)))
+                    val_y_mort = np.append(val_y_mort, self.remove_padding(mort_labels, mask.type(self.bool_type)))
 
             print('Validation Metrics:')
             mean_val_loss = sum(val_loss) / len(val_loss)
-            metrics_list = print_metrics_regression(val_y, val_y_hat, elog=self.elog)  # order: mad, mse, mape, msle, r2, kappa
-            for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], metrics_list):
-                self.add_result(value=metric, name='val_' + metric_name, counter=epoch)
+            if self.config.task in ('LoS', 'multitask'):
+                los_metrics_list = print_metrics_regression(val_y_los, val_y_hat_los, elog=self.elog) # order: mad, mse, mape, msle, r2, kappa
+                for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], los_metrics_list):
+                    self.add_result(value=metric, name='val_' + metric_name, counter=epoch)
+            if self.config.task in ('mortality', 'multitask'):
+                mort_metrics_list = print_metrics_mortality(val_y_mort, val_y_hat_mort, elog=self.elog)
+                for metric_name, metric in zip(['acc', 'prec0', 'prec1', 'rec0', 'rec1', 'auroc', 'auprc', 'f1macro'], mort_metrics_list):
+                    self.add_result(value=metric, name='val_' + metric_name, counter=epoch)
             self.elog.print('Epoch: {} | Validation Loss: {:3.4f}'.format(epoch, mean_val_loss))
 
         elif self.config.mode == 'test' and epoch == self.n_epochs - 1:
             self.test()
 
         if epoch == self.n_epochs - 1 and self.config.save_results_csv:
-            self.elog.save_to_csv(np.vstack((val_y_hat, val_y)).transpose(),
-                                  'val_predictions/epoch{}.csv'.format(epoch),
-                                  header='predictions, label')
+            if self.config.task in ('LoS', 'multitask'):
+                self.elog.save_to_csv(np.vstack((val_y_hat_los, val_y_los)).transpose(),
+                                      'val_predictions_los/epoch{}.csv'.format(epoch),
+                                      header='los_predictions, label')
+            if self.config.task in ('mortality', 'multitask'):
+                self.elog.save_to_csv(np.vstack((val_y_hat_mort, val_y_mort)).transpose(),
+                                      'val_predictions_mort/epoch{}.csv'.format(epoch),
+                                  header='mort_predictions, label')
 
         return
 
@@ -199,44 +231,95 @@ class ExperimentTemplate(PytorchExperiment):
         self.model.eval()
         test_batches = self.test_datareader.batch_gen(batch_size=self.config.batch_size_test)
         test_loss = []
-        test_y_hat = np.array([])
-        test_y = np.array([])
+        test_y_hat_los = np.array([])
+        test_y_los = np.array([])
+        test_y_hat_mort = np.array([])
+        test_y_mort = np.array([])
 
         for batch in test_batches:
 
             # unpack batch
             if self.config.dataset == 'MIMIC':
-                padded, mask, flat, labels, seq_lengths = batch
+                padded, mask, flat, los_labels, mort_labels, seq_lengths = batch
                 diagnoses = None
             else:
-                padded, mask, diagnoses, flat, labels, seq_lengths = batch
+                padded, mask, diagnoses, flat, los_labels, mort_labels, seq_lengths = batch
 
-            y_hat = self.model(padded, diagnoses, flat)
-            loss = self.model.loss(y_hat, labels, mask, seq_lengths, self.device, self.config.sum_losses, self.config.loss)
+            y_hat_los, y_hat_mort = self.model(padded, diagnoses, flat)
+            loss = self.model.loss(y_hat_los, y_hat_mort, los_labels, mort_labels, mask, seq_lengths, self.device,
+                                   self.config.sum_losses, self.config.loss)
             test_loss.append(loss.item())  # can't add the model.loss directly because it causes a memory leak
 
-            test_y_hat = np.append(test_y_hat, self.remove_padding(y_hat, mask.type(self.bool_type)))
-            test_y = np.append(test_y, self.remove_padding(labels, mask.type(self.bool_type)))
+            if self.config.task in ('LoS', 'multitask'):
+                test_y_hat_los = np.append(test_y_hat_los,
+                                          self.remove_padding(y_hat_los, mask.type(self.bool_type)))
+                test_y_los = np.append(test_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
+            if self.config.task in ('mortality', 'multitask'):
+                test_y_hat_mort = np.append(test_y_hat_mort,
+                                           self.remove_padding(y_hat_mort, mask.type(self.bool_type)))
+                test_y_mort = np.append(test_y_mort, self.remove_padding(mort_labels, mask.type(self.bool_type)))
 
         print('Test Metrics:')
         mean_test_loss = sum(test_loss) / len(test_loss)
-        metrics_list = print_metrics_regression(test_y, test_y_hat, elog=self.elog)  # order: mad, mse, mape, msle, r2, kappa
+
+        if self.config.task in ('LoS', 'multitask'):
+            los_metrics_list = print_metrics_regression(test_y_los, test_y_hat_los, elog=self.elog)  # order: mad, mse, mape, msle, r2, kappa
+            for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], los_metrics_list):
+                self.add_result(value=metric, name='test_' + metric_name)
+        if self.config.task in ('mortality', 'multitask'):
+            mort_metrics_list = print_metrics_mortality(test_y_mort, test_y_hat_mort, elog=self.elog)
+            for metric_name, metric in zip(['acc', 'prec0', 'prec1', 'rec0', 'rec1', 'auroc', 'auprc', 'f1macro'],
+                                           mort_metrics_list):
+                self.add_result(value=metric, name='test_' + metric_name)
+
         if self.config.save_results_csv:
-            self.elog.save_to_csv(np.vstack((test_y_hat, test_y)).transpose(), 'test_predictions.csv', header='predictions, label')
-        for metric_name, metric in zip(['mad', 'mse', 'mape', 'msle', 'r2', 'kappa'], metrics_list):
-            self.add_result(value=metric, name='test_' + metric_name)
+            if self.config.task in ('LoS', 'multitask'):
+                self.elog.save_to_csv(np.vstack((test_y_hat_los, test_y_los)).transpose(), 'val_predictions_los.csv', header='los_predictions, label')
+            if self.config.task in ('mortality', 'multitask'):
+                self.elog.save_to_csv(np.vstack((test_y_hat_mort, test_y_mort)).transpose(), 'val_predictions_mort.csv', header='mort_predictions, label')
         self.elog.print('Test Loss: {:3.4f}'.format(mean_test_loss))
 
-        with open(self.config.base_dir + '/results.csv', 'a') as f:
-            values = self.elog.plot_logger.values
-            mad = values['test_mad']['test_mad'][-1][0]
-            mse = values['test_mse']['test_mse'][-1][0]
-            mape = values['test_mape']['test_mape'][-1][0]
-            msle = values['test_msle']['test_msle'][-1][0]
-            r2 = values['test_r2']['test_r2'][-1][0]
-            kappa = values['test_kappa']['test_kappa'][-1][0]
-            f.write('\n{},{},{},{},{},{}'.format(mad, mse, mape, msle, r2, kappa))
-
+        # write to file
+        if self.config.task == 'LoS':
+            with open(self.config.base_dir + '/results.csv', 'a') as f:
+                values = self.elog.plot_logger.values
+                mad = values['test_mad']['test_mad'][-1][0]
+                mse = values['test_mse']['test_mse'][-1][0]
+                mape = values['test_mape']['test_mape'][-1][0]
+                msle = values['test_msle']['test_msle'][-1][0]
+                r2 = values['test_r2']['test_r2'][-1][0]
+                kappa = values['test_kappa']['test_kappa'][-1][0]
+                f.write('\n{},{},{},{},{},{}'.format(mad, mse, mape, msle, r2, kappa))
+        elif self.config.task == 'mortality':
+            with open(self.config.base_dir + '/results.csv', 'a') as f:
+                values = self.elog.plot_logger.values
+                acc = values['test_acc']['test_acc'][-1][0]
+                prec0 = values['test_prec0']['test_prec0'][-1][0]
+                prec1 = values['test_prec1']['test_prec1'][-1][0]
+                rec0 = values['test_rec0']['test_rec0'][-1][0]
+                rec1 = values['test_rec1']['test_rec1'][-1][0]
+                auroc = values['test_auroc']['test_auroc'][-1][0]
+                auprc = values['test_auprc']['test_auprc'][-1][0]
+                f1macro = values['test_f1macro']['test_f1macro'][-1][0]
+                f.write('\n{},{},{},{},{},{},{},{}'.format(acc, prec0, prec1, rec0, rec1, auroc, auprc, f1macro))
+        elif self.config.task == 'multitask':
+            with open(self.config.base_dir + '/results.csv', 'a') as f:
+                values = self.elog.plot_logger.values
+                mad = values['test_mad']['test_mad'][-1][0]
+                mse = values['test_mse']['test_mse'][-1][0]
+                mape = values['test_mape']['test_mape'][-1][0]
+                msle = values['test_msle']['test_msle'][-1][0]
+                r2 = values['test_r2']['test_r2'][-1][0]
+                kappa = values['test_kappa']['test_kappa'][-1][0]
+                acc = values['test_acc']['test_acc'][-1][0]
+                prec0 = values['test_prec0']['test_prec0'][-1][0]
+                prec1 = values['test_prec1']['test_prec1'][-1][0]
+                rec0 = values['test_rec0']['test_rec0'][-1][0]
+                rec1 = values['test_rec1']['test_rec1'][-1][0]
+                auroc = values['test_auroc']['test_auroc'][-1][0]
+                auprc = values['test_auprc']['test_auprc'][-1][0]
+                f1macro = values['test_f1macro']['test_f1macro'][-1][0]
+                f.write('\n{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(mad, mse, mape, msle, r2, kappa, acc, prec0, prec1, rec0, rec1, auroc, auprc, f1macro))
         return
 
     def resume(self, epoch):

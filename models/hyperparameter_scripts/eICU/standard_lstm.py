@@ -5,12 +5,14 @@ import random
 from models.initialise_arguments import initialise_lstm_arguments
 
 
-def get_hyperparam_config():
+def get_hyperparam_config(dataset):
 
     c = initialise_lstm_arguments()
     c['mode'] = 'train'
     c['exp_name'] = 'StandardLSTM'
-    c['dataset'] = 'eICU'
+    if dataset == 'MIMIC':
+        c['no_diag'] = True
+    c['dataset'] = dataset
 
     # hyper-parameter grid
     param_grid = {
@@ -34,7 +36,7 @@ if __name__=='__main__':
 
     for i in range(50):
         try:
-            c = get_hyperparam_config()
+            c = get_hyperparam_config('eICU')
             log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
             standard_lstm = BaselineLSTM(config=c,
                                          n_epochs=c.n_epochs,

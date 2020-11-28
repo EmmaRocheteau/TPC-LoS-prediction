@@ -147,7 +147,7 @@ TPC | 3.21 | 61.2 | 65.8 | 0.44 | 0.15 | 0.73
     Note that your experiment can be customised by using command line arguments e.g.
     
     ```
-    python -m models.run_tpc --dataset eICU --model_type tpc --n_layers 4 --kernel_size 3 --no_temp_kernels 10 --point_size 10 --last_linear_size 20 --diagnosis_size 20 --batch_size 64 --learning_rate 0.001 --main_dropout_rate 0.3 --temp_dropout_rate 0.1 
+    python -m models.run_tpc --dataset eICU --task LoS --model_type tpc --n_layers 4 --kernel_size 3 --no_temp_kernels 10 --point_size 10 --last_linear_size 20 --diagnosis_size 20 --batch_size 64 --learning_rate 0.001 --main_dropout_rate 0.3 --temp_dropout_rate 0.1 
     ```
     
     Each experiment you run will create a directory within models/experiments. The naming of the directory is based on 
@@ -169,7 +169,7 @@ TPC | 3.21 | 61.2 | 65.8 | 0.44 | 0.15 | 0.73
     The final experiments for the paper are found in models/final_experiment_scripts e.g.:
     
     ```
-    python -m models.final_experiment_scripts.eICU.tpc
+    python -m models.final_experiment_scripts.eICU.LoS.tpc
     ```
     
 ### References

@@ -14,6 +14,7 @@ def initialise_arguments():
     parser.add_argument('-shuffle_train', action='store_true')
     parser.add_argument('-save_results_csv', action='store_true')
     parser.add_argument('--percentage_data', default=100.0, type=float)
+    parser.add_argument('--task', default='LoS', type=str, help='can be either LoS, mortality, or multitask (both)')
 
     # loss
     parser.add_argument('--loss', default='msle', type=str, help='can either be msle or mse')

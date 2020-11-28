@@ -21,10 +21,9 @@ class BaselineTransformer(ExperimentTemplate):
 if __name__=='__main__':
 
     c = initialise_transformer_arguments()
-    c['mode'] = 'train'
     c['exp_name'] = 'Transformer'
 
-    log_folder_path = create_folder('models/experiments', c.exp_name)
+    log_folder_path = create_folder('models/experiments/{}/{}'.format(c.dataset, c.task), c.exp_name)
     baseline_transformer = BaselineTransformer(config=c,
                                                n_epochs=c.n_epochs,
                                                name=c.exp_name,

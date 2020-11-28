@@ -7,9 +7,7 @@ if __name__=='__main__':
 
     for i in range(50):
         try:
-            c = get_hyperparam_config()
-            c['dataset'] = 'MIMIC'
-            c['no_diag'] = True
+            c = get_hyperparam_config('MIMIC')
             log_folder_path = create_folder('models/experiments/hyperparameters/MIMIC', c.exp_name)
             transformer = BaselineTransformer(config=c,
                                               n_epochs=c.n_epochs,

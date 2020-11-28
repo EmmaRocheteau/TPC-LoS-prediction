@@ -61,8 +61,9 @@ class eICUReader(object):
         # make sure where there is no data the label is 0
         return (times.clamp(min=1/48) * mask)
 
-    def get_mort_labels(self, labels):
-        return
+    def get_mort_labels(self, labels, length):
+        repeated_labels = labels.unsqueeze(1).repeat(1, length)
+        return repeated_labels
 
     def batch_gen(self, batch_size=8, time_before_pred=5):
 
@@ -79,6 +80,7 @@ class eICUReader(object):
                 ts_batch = [[line[1:] for line in ts] for _, ts in islice(ts_patient, batch_size)]
                 padded, mask, seq_lengths = self.pad_sequences(ts_batch)
                 los_labels = self.get_los_labels(torch.tensor(self.labels.iloc[i*batch_size:(i+1)*batch_size,7].values, device=self._device).type(self._dtype), padded[:,0,:], mask)
+                mort_labels = self.get_mort_labels(torch.tensor(self.labels.iloc[i*batch_size:(i+1)*batch_size,5].values, device=self._device).type(self._dtype), length=mask.shape[1])
 
                 # we must avoid taking data before time_before_pred hours to avoid diagnoses and apache variable from the future
                 yield (padded,  # B * (2F + 2) * T
@@ -86,6 +88,7 @@ class eICUReader(object):
                        torch.tensor(self.diagnoses.iloc[i*batch_size:(i+1)*batch_size].values, device=self._device).type(self._dtype),  # B * D
                        torch.tensor(self.flat.iloc[i*batch_size:(i+1)*batch_size].values.astype(float), device=self._device).type(self._dtype),  # B * no_flat_features
                        los_labels[:, time_before_pred:],
+                       mort_labels[:, time_before_pred:],
                        seq_lengths - time_before_pred)
 
 if __name__=='__main__':

@@ -5,12 +5,14 @@ import random
 from models.initialise_arguments import initialise_tpc_arguments
 
 
-def get_hyperparam_config():
+def get_hyperparam_config(dataset):
 
     c = initialise_tpc_arguments()
     c['mode'] = 'train'
     c['exp_name'] = 'TPC'
-    c['dataset'] = 'eICU'
+    if dataset == 'MIMIC':
+        c['no_diag'] = True
+    c['dataset'] = dataset
     c['model_type'] = 'tpc'
 
     # hyper-parameter grid
@@ -33,7 +35,7 @@ if __name__=='__main__':
 
     for i in range(25):
         try:
-            c = get_hyperparam_config()
+            c = get_hyperparam_config('eICU')
             log_folder_path = create_folder('models/experiments/hyperparameters/eICU', c.exp_name)
             tpc = TPC(config=c,
                       n_epochs=c.n_epochs,

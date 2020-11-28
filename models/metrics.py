@@ -51,3 +51,35 @@ def print_metrics_regression(y_true, predictions, verbose=1, elog=None):
         print('Cohen kappa score = {}'.format(kappa))
 
     return [mad, mse, mape, msle, r2, kappa]
+
+
+def print_metrics_mortality(y_true, predictions, verbose=1, elog=None):
+    predictions = np.array(predictions)
+    predictions = predictions.argmax(axis=1)
+    cf = metrics.confusion_matrix(y_true, predictions, labels=range(2))
+    if elog is not None:
+        elog.print('Confusion matrix:')
+        elog.print(cf)
+    elif verbose:
+        print('Confusion matrix:')
+        print(cf)
+    cf = cf.astype(np.float32)
+
+    acc = (cf[0][0] + cf[1][1]) / np.sum(cf)
+    prec0 = cf[0][0] / (cf[0][0] + cf[1][0])
+    prec1 = cf[1][1] / (cf[1][1] + cf[0][1])
+    rec0 = cf[0][0] / (cf[0][0] + cf[0][1])
+    rec1 = cf[1][1] / (cf[1][1] + cf[1][0])
+
+    auroc = metrics.roc_auc_score(y_true, predictions[:, 1])
+    (precisions, recalls, thresholds) = metrics.precision_recall_curve(y_true, predictions[:, 1])
+    auprc = metrics.auc(recalls, precisions)
+    f1macro = metrics.f1_score(y_true, predictions, average='macro')
+
+    results = {"acc": acc, "prec0": prec0, "prec1": prec1, "rec0": rec0, "rec1": rec1,
+               "auroc": auroc, "auprc": auprc, "f1macro": f1macro}
+    if verbose:
+        for key in results:
+            print("{}: {:.4f}".format(key, results[key]))
+
+    return [acc, prec0, prec1, rec0, rec1, auroc, auprc, f1macro]

@@ -20,11 +20,9 @@ class TPC(ExperimentTemplate):
 if __name__=='__main__':
 
     c = initialise_tpc_arguments()
-    c['mode'] = 'train'
     c['exp_name'] = 'TPC'
-    c['model_type'] = 'tpc'
 
-    log_folder_path = create_folder('models/experiments', c.exp_name)
+    log_folder_path = create_folder('models/experiments/{}/{}'.format(c.dataset, c.task), c.exp_name)
 
     tpc = TPC(config=c,
               n_epochs=c.n_epochs,
