@@ -85,4 +85,12 @@ def best_transformer(c):
             c['n_epochs'] = 15
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
+        c['batch_size'] = 64
+        c['n_layers'] = 2
+        c['feedforward_size'] = 64
+        c['d_model'] = 32
+        c['n_heads'] = 1
+        c['learning_rate'] = 0.00129
+        c['trans_dropout_rate'] = 0.05
+        c['n_epochs'] = 15
     return c
