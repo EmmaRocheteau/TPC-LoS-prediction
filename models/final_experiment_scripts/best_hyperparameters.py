@@ -1,4 +1,18 @@
+def best_global(c):
+    if c['dataset'] == 'eICU':
+        c['main_dropout_rate'] = 0.45
+        c['last_linear_size'] = 17
+        c['diagnosis_size'] = 64
+        c['batch_norm'] = 'mybatchnorm'
+    elif c['dataset'] == 'MIMIC':
+        # diagnosis size does not apply for MIMIC since we don't have diagnoses
+        c['main_dropout_rate'] = None
+        c['last_linear_size'] = None
+        c['batch_norm'] = 'mybatchnorm'
+    return c
+
 def best_tpc(c):
+    c = best_global(c)
     c['mode'] = 'test'
     c['model_type'] = 'tpc'
     if c['dataset'] == 'eICU':
@@ -14,9 +28,20 @@ def best_tpc(c):
         c['point_sizes'] = [13] * 9
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
+        c['n_epochs'] = None
+        c['batch_size']= None
+        c['n_layers'] = None
+        c['kernel_size'] = None
+        c['no_temp_kernels'] = None
+        c['point_size'] = None
+        c['learning_rate'] = None
+        c['temp_dropout_rate'] = None
+        c['temp_kernels'] = None
+        c['point_sizes'] = None
     return c
 
 def best_lstm(c):
+    c = best_global(c)
     c['mode'] = 'test'
     if c['dataset'] == 'eICU':
         c['batch_size'] = 512
@@ -60,10 +85,12 @@ def best_cw_lstm(c):
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
         c['batch_size'] = 128  # lowered from 512 because of memory issues
+        c['hidden_size'] = None
     return c
 
 
 def best_transformer(c):
+    c = best_global(c)
     c['mode'] = 'test'
     if c['dataset'] == 'eICU':
         c['batch_size'] = 32
