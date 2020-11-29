@@ -656,7 +656,7 @@ class TempPointConv(nn.Module):
                 point_output)  # (B * T) * point_size
 
 
-    def loss(self, y_hat_los, y_hat_mort, y_los, y_mort, mask, seq_lengths, device, sum_losses, loss_type, alpha=0.5):
+    def loss(self, y_hat_los, y_hat_mort, y_los, y_mort, mask, seq_lengths, device, sum_losses, loss_type, alpha=100):
         # mort loss
         if self.task == 'mortality':
             loss = self.bce_loss(y_hat_mort, y_mort)
