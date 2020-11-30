@@ -82,7 +82,7 @@ class ExperimentTemplate(PytorchExperiment):
 
         return
 
-    def train(self, epoch):
+    def train(self, epoch, mort_pred_time=24):
 
         self.model.train()
         if epoch > 0 and self.config.shuffle_train:
@@ -118,8 +118,11 @@ class ExperimentTemplate(PytorchExperiment):
                 train_y_hat_los = np.append(train_y_hat_los, self.remove_padding(y_hat_los, mask.type(self.bool_type)))
                 train_y_los = np.append(train_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
             if self.config.task in ('mortality', 'multitask'):
-                train_y_hat_mort = np.append(train_y_hat_mort, self.remove_padding(y_hat_mort, mask.type(self.bool_type)))
-                train_y_mort = np.append(train_y_mort, self.remove_padding(mort_labels, mask.type(self.bool_type)))
+                train_y_hat_mort = np.append(train_y_hat_mort,
+                                             self.remove_padding(y_hat_mort[:, mort_pred_time],
+                                                                 mask.type(self.bool_type)[:, mort_pred_time]))
+                train_y_mort = np.append(train_y_mort, self.remove_padding(mort_labels[:, mort_pred_time],
+                                                                           mask.type(self.bool_type)[:, mort_pred_time]))
 
             if self.config.intermediate_reporting and batch_idx % self.config.log_interval == 0 and batch_idx != 0:
 
@@ -166,7 +169,7 @@ class ExperimentTemplate(PytorchExperiment):
 
         return
 
-    def validate(self, epoch):
+    def validate(self, epoch, mort_pred_time=24):
 
         if self.config.mode == 'train':
             self.model.eval()
@@ -197,8 +200,10 @@ class ExperimentTemplate(PytorchExperiment):
                     val_y_los = np.append(val_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
                 if self.config.task in ('mortality', 'multitask'):
                     val_y_hat_mort = np.append(val_y_hat_mort,
-                                                 self.remove_padding(y_hat_mort, mask.type(self.bool_type)))
-                    val_y_mort = np.append(val_y_mort, self.remove_padding(mort_labels, mask.type(self.bool_type)))
+                                                 self.remove_padding(y_hat_mort[:, mort_pred_time],
+                                                                     mask.type(self.bool_type)[:, mort_pred_time]))
+                    val_y_mort = np.append(val_y_mort, self.remove_padding(mort_labels[:, mort_pred_time],
+                                                                           mask.type(self.bool_type)[:, mort_pred_time]))
 
             print('Validation Metrics:')
             mean_val_loss = sum(val_loss) / len(val_loss)
@@ -227,7 +232,7 @@ class ExperimentTemplate(PytorchExperiment):
 
         return
 
-    def test(self):
+    def test(self, mort_pred_time=24):
 
         self.model.eval()
         test_batches = self.test_datareader.batch_gen(batch_size=self.config.batch_size_test)
@@ -257,8 +262,10 @@ class ExperimentTemplate(PytorchExperiment):
                 test_y_los = np.append(test_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
             if self.config.task in ('mortality', 'multitask'):
                 test_y_hat_mort = np.append(test_y_hat_mort,
-                                           self.remove_padding(y_hat_mort, mask.type(self.bool_type)))
-                test_y_mort = np.append(test_y_mort, self.remove_padding(mort_labels, mask.type(self.bool_type)))
+                                           self.remove_padding(y_hat_mort[:, mort_pred_time],
+                                                               mask.type(self.bool_type)[:, mort_pred_time]))
+                test_y_mort = np.append(test_y_mort, self.remove_padding(mort_labels[:, mort_pred_time],
+                                                                         mask.type(self.bool_type)[:, mort_pred_time]))
 
         print('Test Metrics:')
         mean_test_loss = sum(test_loss) / len(test_loss)
