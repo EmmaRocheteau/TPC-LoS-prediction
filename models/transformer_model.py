@@ -1,9 +1,9 @@
 import math
-import numpy as np
 import torch
 import torch.nn as nn
 from models.tpc_model import MSLELoss, MSELoss, MyBatchNorm1d, EmptyModule
 from torch import exp, cat
+
 
 # PositionalEncoding adapted from https://pytorch.org/tutorials/beginner/transformer_tutorial.html. I made the following
 # changes:

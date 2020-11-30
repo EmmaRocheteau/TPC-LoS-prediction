@@ -1,6 +1,7 @@
 import pandas as pd
 from eICU_preprocessing.split_train_test import process_table, shuffle_stays
 
+
 def shuffle_train(train_path):
 
     labels = pd.read_csv(train_path + '/labels.csv', index_col='patient')

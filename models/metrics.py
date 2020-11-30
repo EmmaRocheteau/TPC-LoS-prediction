@@ -1,6 +1,7 @@
 from sklearn import metrics
 import numpy as np
 
+
 class CustomBins:
     inf = 1e18
     bins = [(-inf, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 14), (14, +inf)]
@@ -52,7 +53,6 @@ def print_metrics_regression(y_true, predictions, verbose=1, elog=None):
         print('Cohen kappa score = {}'.format(kappa))
 
     return [mad, mse, mape, msle, r2, kappa]
-
 
 def print_metrics_mortality(y_true, prediction_probs, verbose=1, elog=None):
     print('==> Mortality:')

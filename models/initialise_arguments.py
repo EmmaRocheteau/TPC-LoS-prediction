@@ -1,8 +1,8 @@
 from trixi.util import Config
 import argparse
 
-# all default values stated here are the best hyperparameters in the eICU dataset, not MIMIC
 
+# all default values stated here are the best hyperparameters in the eICU dataset, not MIMIC
 def initialise_arguments():
     parser = argparse.ArgumentParser()
 
