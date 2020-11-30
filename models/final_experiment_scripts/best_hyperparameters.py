@@ -6,8 +6,8 @@ def best_global(c):
         c['batch_norm'] = 'mybatchnorm'
     elif c['dataset'] == 'MIMIC':
         # diagnosis size does not apply for MIMIC since we don't have diagnoses
-        c['main_dropout_rate'] = None
-        c['last_linear_size'] = None
+        c['main_dropout_rate'] = 0
+        c['last_linear_size'] = 36
         c['batch_norm'] = 'mybatchnorm'
     return c
 

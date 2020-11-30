@@ -2,6 +2,7 @@ from eICU_preprocessing.split_train_test import create_folder
 from models.run_tpc import TPC
 import numpy as np
 import random
+from models.final_experiment_scripts.best_hyperparameters import best_global
 from models.initialise_arguments import initialise_tpc_arguments
 
 
@@ -14,6 +15,7 @@ def get_hyperparam_config(dataset):
         c['no_diag'] = True
     c['dataset'] = dataset
     c['model_type'] = 'tpc'
+    c = best_global(c)
 
     # hyper-parameter grid
     param_grid = {

@@ -11,7 +11,6 @@ select count(distinct ch.stay_id), d.label, avg(valuenum) as avg_value
 */
 
 -- requires tablefunc extension, can be obtained with 'CREATE EXTENSION tablefunc;'
-/*
 drop materialized view if exists extra_vars cascade;
 create materialized view extra_vars as
   select * from crosstab(
@@ -27,7 +26,7 @@ create materialized view extra_vars as
           and date_part(''hour'', ch.charttime) - date_part(''hour'', i.intime) between -24 and 5
         group by ch.stay_id, d.label'
         ) as ct(stay_id integer, weight double precision, eyes double precision, motor double precision, verbal double precision, height double precision);
-*/
+
 
 drop materialized view if exists ld_flat cascade;
 create materialized view ld_flat as

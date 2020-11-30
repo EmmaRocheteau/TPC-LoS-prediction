@@ -2,6 +2,7 @@ from eICU_preprocessing.split_train_test import create_folder
 from models.run_tpc import TPC
 import numpy as np
 import random
+from models.final_experiment_scripts.best_hyperparameters import best_global
 from models.initialise_arguments import initialise_tpc_arguments
 
 
@@ -15,6 +16,7 @@ def get_hyperparam_config(dataset):
     c['dataset'] = dataset
     c['model_type'] = 'temp_only'
     c['share_weights'] = True
+    c = best_global(c)
 
     temp_kernels_choice = list(int(x) for x in np.logspace(np.log2(16), np.log2(64), base=2, num=9))
     c['temp_kernels'] = [random.choice(temp_kernels_choice)] * c['n_layers']
