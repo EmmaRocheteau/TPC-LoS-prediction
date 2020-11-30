@@ -6,6 +6,9 @@ from torch.nn.functional import pad
 from torch.nn.modules.batchnorm import _BatchNorm
 
 
+###============== The main defining function of the TPC model is temp_pointwise() on line 403 ==============###
+
+
 # Mean Squared Logarithmic Error (MSLE) loss
 class MSLELoss(nn.Module):
     def __init__(self):
@@ -395,110 +398,8 @@ class TempPointConv(nn.Module):
         return
 
 
-    def forward(self, X, diagnoses, flat):
-
-        # flat is B * no_flat_features
-        # diagnoses is B * D
-        # X is B * (2F + 2) * T
-        # X_mask is B * T
-        # (the batch is padded to the longest sequence, the + 2 is the time and the hour which are not for temporal convolution)
-
-        # get rid of the time and hour fields - these shouldn't go through the temporal network
-        # and split into features and indicator variables
-        X_separated = torch.split(X[:, 1:-1, :], self.F, dim=1)  # tuple ((B * F * T), (B * F * T))
-
-        # prepare repeat arguments and initialise layer loop
-        B, _, T = X_separated[0].shape
-        if self.model_type in ['pointwise_only', 'tpc']:
-            repeat_flat = flat.repeat_interleave(T, dim=0)  # (B * T) * no_flat_features
-            if self.no_mask:
-                X_orig = cat((X_separated[0],
-                              X[:, 0, :].unsqueeze(1),
-                              X[:, -1, :].unsqueeze(1)), dim=1).permute(0, 2, 1).contiguous().view(B * T, self.F + 2)  # (B * T) * (F + 2)
-            else:
-                X_orig = X.permute(0, 2, 1).contiguous().view(B * T, 2 * self.F + 2)  # (B * T) * (2F + 2)
-            repeat_args = {'repeat_flat': repeat_flat,
-                           'X_orig': X_orig,
-                           'B': B,
-                           'T': T}
-            if self.model_type == 'tpc':
-                if self.no_mask:
-                    next_X = X_separated[0]
-                else:
-                    next_X = torch.stack(X_separated, dim=2).reshape(B, 2 * self.F, T)  # B * 2F * T
-                point_skip = X_separated[0]  # keeps track of skip connections generated from linear layers; B * F * T
-                temp_output = None
-                point_output = None
-            else:  # pointwise only
-                next_X = X_orig
-                point_skip = None
-        elif self.model_type == 'temp_only':
-            next_X = torch.stack(X_separated, dim=2).view(B, 2 * self.F, T)  # B * 2F * T
-            X_temp_orig = X_separated[0]  # skip connections for temp only model
-            repeat_args = {'X_temp_orig': X_temp_orig,
-                           'B': B,
-                           'T': T}
-
-        if self.no_skip_connections:
-            temp_output = next_X
-            point_output = cat((X_orig,  # (B * T) * (2F + 2)
-                                repeat_flat),  # (B * T) * no_flat_features
-                               dim=1)  # (B * T) * (2F + 2 + no_flat_features)
-            self.layer1 = True
-
-        for i in range(self.n_layers):
-            kwargs = dict(self.layer_modules[str(i)], **repeat_args)
-            if self.model_type == 'tpc':
-                if self.no_skip_connections:
-                    temp_output, point_output = self.temp_pointwise_no_skip(prev_point=point_output, prev_temp=temp_output,
-                                                                            temp_kernels=self.layers[i]['temp_kernels'],
-                                                                            padding=self.layers[i]['padding'], **kwargs)
-
-                else:
-                    temp_output, point_output, next_X, point_skip = self.temp_pointwise(X=next_X, point_skip=point_skip,
-                                                                        prev_temp=temp_output, prev_point=point_output,
-                                                                        temp_kernels=self.layers[i]['temp_kernels'],
-                                                                        padding=self.layers[i]['padding'],
-                                                                        point_size=self.layers[i]['point_size'],
-                                                                        **kwargs)
-            elif self.model_type == 'temp_only':
-                next_X = self.temp(X=next_X, temp_kernels=self.layers[i]['temp_kernels'],
-                                   padding=self.layers[i]['padding'], **kwargs)
-            elif self.model_type == 'pointwise_only':
-                next_X, point_skip = self.point(X=next_X, point_skip=point_skip, **kwargs)
-
-        # tidy up
-        if self.model_type == 'pointwise_only':
-            next_X = next_X.view(B, T, -1).permute(0, 2, 1)
-        elif self.no_skip_connections:
-            # combine the final layer
-            next_X = cat((point_output,
-                          temp_output.permute(0, 2, 1).contiguous().view(B * T, self.F * self.layers[-1]['temp_kernels'])),
-                         dim=1)
-            next_X = next_X.view(B, T, -1).permute(0, 2, 1)
-
-        # note that we cut off at 5 hours here because the model is only valid from 5 hours onwards
-        if self.no_diag:
-            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
-                                     next_X[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)  # (B * (T - 5)) * (((F + Zt) * (1 + Y)) + no_flat_features) for tpc
-        else:
-            diagnoses_enc = self.relu(self.main_dropout(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
-            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
-                                     diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
-                                     next_X[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)  # (B * (T - 5)) * (((F + Zt) * (1 + Y)) + diagnosis_size + no_flat_features) for tpc
-
-        last_point_los = self.relu(self.main_dropout(self.bn_point_last_los(self.point_last_los(combined_features))))
-        last_point_mort = self.relu(self.main_dropout(self.bn_point_last_mort(self.point_last_mort(combined_features))))
-
-        if self.no_exp:
-            los_predictions = self.hardtanh(self.point_final_los(last_point_los).view(B, T - 5))  # B * (T - 5)
-        else:
-            los_predictions = self.hardtanh(exp(self.point_final_los(last_point_los).view(B, T - 5)))  # B * (T - 5)
-        mort_predictions = self.sigmoid(self.point_final_mort(last_point_mort).view(B, T - 5))  # B * (T - 5)
-
-        return los_predictions, mort_predictions
-
-
+    # This is really where the crux of TPC is defined. This function defines one TPC layer, as in Figure 3 in the paper:
+    # https://arxiv.org/pdf/2007.09483.pdf
     def temp_pointwise(self, B=None, T=None, X=None, repeat_flat=None, X_orig=None, temp=None, bn_temp=None, point=None,
                        bn_point=None, temp_kernels=None, point_size=None, padding=None, prev_temp=None, prev_point=None,
                        point_skip=None):
@@ -624,6 +525,110 @@ class TempPointConv(nn.Module):
 
         return (temp_output,  # B * (F * temp_kernels) * T
                 point_output)  # (B * T) * point_size
+
+
+    def forward(self, X, diagnoses, flat):
+
+        # flat is B * no_flat_features
+        # diagnoses is B * D
+        # X is B * (2F + 2) * T
+        # X_mask is B * T
+        # (the batch is padded to the longest sequence, the + 2 is the time and the hour which are not for temporal convolution)
+
+        # get rid of the time and hour fields - these shouldn't go through the temporal network
+        # and split into features and indicator variables
+        X_separated = torch.split(X[:, 1:-1, :], self.F, dim=1)  # tuple ((B * F * T), (B * F * T))
+
+        # prepare repeat arguments and initialise layer loop
+        B, _, T = X_separated[0].shape
+        if self.model_type in ['pointwise_only', 'tpc']:
+            repeat_flat = flat.repeat_interleave(T, dim=0)  # (B * T) * no_flat_features
+            if self.no_mask:
+                X_orig = cat((X_separated[0],
+                              X[:, 0, :].unsqueeze(1),
+                              X[:, -1, :].unsqueeze(1)), dim=1).permute(0, 2, 1).contiguous().view(B * T, self.F + 2)  # (B * T) * (F + 2)
+            else:
+                X_orig = X.permute(0, 2, 1).contiguous().view(B * T, 2 * self.F + 2)  # (B * T) * (2F + 2)
+            repeat_args = {'repeat_flat': repeat_flat,
+                           'X_orig': X_orig,
+                           'B': B,
+                           'T': T}
+            if self.model_type == 'tpc':
+                if self.no_mask:
+                    next_X = X_separated[0]
+                else:
+                    next_X = torch.stack(X_separated, dim=2).reshape(B, 2 * self.F, T)  # B * 2F * T
+                point_skip = X_separated[0]  # keeps track of skip connections generated from linear layers; B * F * T
+                temp_output = None
+                point_output = None
+            else:  # pointwise only
+                next_X = X_orig
+                point_skip = None
+        elif self.model_type == 'temp_only':
+            next_X = torch.stack(X_separated, dim=2).view(B, 2 * self.F, T)  # B * 2F * T
+            X_temp_orig = X_separated[0]  # skip connections for temp only model
+            repeat_args = {'X_temp_orig': X_temp_orig,
+                           'B': B,
+                           'T': T}
+
+        if self.no_skip_connections:
+            temp_output = next_X
+            point_output = cat((X_orig,  # (B * T) * (2F + 2)
+                                repeat_flat),  # (B * T) * no_flat_features
+                               dim=1)  # (B * T) * (2F + 2 + no_flat_features)
+            self.layer1 = True
+
+        for i in range(self.n_layers):
+            kwargs = dict(self.layer_modules[str(i)], **repeat_args)
+            if self.model_type == 'tpc':
+                if self.no_skip_connections:
+                    temp_output, point_output = self.temp_pointwise_no_skip(prev_point=point_output, prev_temp=temp_output,
+                                                                            temp_kernels=self.layers[i]['temp_kernels'],
+                                                                            padding=self.layers[i]['padding'], **kwargs)
+
+                else:
+                    temp_output, point_output, next_X, point_skip = self.temp_pointwise(X=next_X, point_skip=point_skip,
+                                                                        prev_temp=temp_output, prev_point=point_output,
+                                                                        temp_kernels=self.layers[i]['temp_kernels'],
+                                                                        padding=self.layers[i]['padding'],
+                                                                        point_size=self.layers[i]['point_size'],
+                                                                        **kwargs)
+            elif self.model_type == 'temp_only':
+                next_X = self.temp(X=next_X, temp_kernels=self.layers[i]['temp_kernels'],
+                                   padding=self.layers[i]['padding'], **kwargs)
+            elif self.model_type == 'pointwise_only':
+                next_X, point_skip = self.point(X=next_X, point_skip=point_skip, **kwargs)
+
+        # tidy up
+        if self.model_type == 'pointwise_only':
+            next_X = next_X.view(B, T, -1).permute(0, 2, 1)
+        elif self.no_skip_connections:
+            # combine the final layer
+            next_X = cat((point_output,
+                          temp_output.permute(0, 2, 1).contiguous().view(B * T, self.F * self.layers[-1]['temp_kernels'])),
+                         dim=1)
+            next_X = next_X.view(B, T, -1).permute(0, 2, 1)
+
+        # note that we cut off at 5 hours here because the model is only valid from 5 hours onwards
+        if self.no_diag:
+            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
+                                     next_X[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)  # (B * (T - 5)) * (((F + Zt) * (1 + Y)) + no_flat_features) for tpc
+        else:
+            diagnoses_enc = self.relu(self.main_dropout(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
+            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
+                                     diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
+                                     next_X[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)  # (B * (T - 5)) * (((F + Zt) * (1 + Y)) + diagnosis_size + no_flat_features) for tpc
+
+        last_point_los = self.relu(self.main_dropout(self.bn_point_last_los(self.point_last_los(combined_features))))
+        last_point_mort = self.relu(self.main_dropout(self.bn_point_last_mort(self.point_last_mort(combined_features))))
+
+        if self.no_exp:
+            los_predictions = self.hardtanh(self.point_final_los(last_point_los).view(B, T - 5))  # B * (T - 5)
+        else:
+            los_predictions = self.hardtanh(exp(self.point_final_los(last_point_los).view(B, T - 5)))  # B * (T - 5)
+        mort_predictions = self.sigmoid(self.point_final_mort(last_point_mort).view(B, T - 5))  # B * (T - 5)
+
+        return los_predictions, mort_predictions
 
 
     def temp_pointwise_no_skip_old(self, B=None, T=None, temp=None, bn_temp=None, point=None, bn_point=None, padding=None, prev_temp=None,

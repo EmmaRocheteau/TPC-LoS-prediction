@@ -19,11 +19,11 @@ def print_metrics_mortality(df):
 
     for i, (m, cb) in enumerate(zip(mean_all, conf_bound)):
         if i == 0:
-            m = str(np.round(m, 2)).ljust(4, '0')
-            cb = str(np.round(cb, 2)).ljust(4, '0')
+            m = str(np.round(m, 3)).ljust(5, '0')
+            cb = str(np.round(cb, 3)).ljust(5, '0')
         elif i == 1:
-            m = str(np.round(m, 2)).ljust(4, '0')
-            cb = str(np.round(cb, 2)).ljust(4, '0')
+            m = str(np.round(m, 3)).ljust(5, '0')
+            cb = str(np.round(cb, 3)).ljust(5, '0')
         and_space = ' & '
         print('{}$\pm${}{}'.format(m, cb, and_space), end='', flush=True)
 
@@ -75,6 +75,6 @@ def main(dataset, task, experiment):
 
 if __name__=='__main__':
     dataset = 'eICU'
-    task = 'LoS'
-    experiment = 'StandardLSTM'
+    task = 'multitask'
+    experiment = 'TPC'
     main(dataset, task, experiment)

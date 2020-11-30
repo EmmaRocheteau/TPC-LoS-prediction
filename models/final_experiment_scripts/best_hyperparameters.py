@@ -70,7 +70,7 @@ def best_lstm(c):
 def best_cw_lstm(c):
     c['mode'] = 'test'
     c['channelwise'] = True
-    # carry over the best parameters from lstm
+    # carry over the best parameters from lstm, including global
     c = best_lstm(c)
     if c['dataset'] == 'eICU':
         c['hidden_size'] = 8
