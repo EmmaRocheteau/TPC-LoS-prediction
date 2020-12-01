@@ -33,16 +33,17 @@ def best_tpc(c):
         c['point_sizes'] = [13] * 9
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
-        c['n_epochs'] = None if c['task'] is not 'mortality' else 6
-        c['batch_size']= None
-        c['n_layers'] = None
-        c['kernel_size'] = None
-        c['no_temp_kernels'] = None
-        c['point_size'] = None
-        c['learning_rate'] = None
-        c['temp_dropout_rate'] = None
-        c['temp_kernels'] = None
-        c['point_sizes'] = None
+        c['n_epochs'] = 10 if c['task'] is not 'mortality' else 6
+        c['batch_size'] = 8
+        c['batch_size_test'] = 8  # purely to keep experiment size small so I can run many in parallel
+        c['n_layers'] = 11
+        c['kernel_size'] = 3
+        c['no_temp_kernels'] = 10
+        c['point_size'] = 11
+        c['learning_rate'] = 0.00413
+        c['temp_dropout_rate'] = 0.1
+        c['temp_kernels'] = [10] * 11
+        c['point_sizes'] = [11] * 11
     return c
 
 def best_lstm(c):
