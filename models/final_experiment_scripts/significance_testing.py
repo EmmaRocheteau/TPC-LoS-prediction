@@ -18,8 +18,8 @@ def ttest(list_results1, list_results2, param):
 
 if __name__=='__main__':
     dataset = 'eICU'
-    exp1 = get_metrics(dataset, 'LoS', 'StandardLSTM')
-    exp2 = get_metrics(dataset, 'multitask', 'StandardLSTM')
+    exp1 = get_metrics(dataset, 'LoS', 'Transformer')
+    exp2 = get_metrics(dataset, 'multitask', 'Transformer')
 
     for param in exp1.columns:
         ttest(exp1[param], exp2[param], param)

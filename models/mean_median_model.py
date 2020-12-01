@@ -30,11 +30,11 @@ def mean_median(dataset):
 
         # unpack batch
         if dataset == 'MIMIC':
-            padded, mask, flat, labels, seq_lengths = batch
+            padded, mask, flat, los_labels, mort_labels, seq_lengths = batch
         else:
-            padded, mask, diagnoses, flat, labels, seq_lengths = batch
+            padded, mask, diagnoses, flat, los_labels, mort_labels, seq_lengths = batch
 
-        train_y = np.append(train_y, remove_padding(labels, mask.type(bool_type), device))
+        train_y = np.append(train_y, remove_padding(los_labels, mask.type(bool_type), device))
 
     train_y = pd.DataFrame(train_y, columns=['true'])
 
@@ -45,11 +45,11 @@ def mean_median(dataset):
 
         # unpack batch
         if dataset == 'MIMIC':
-            padded, mask, flat, labels, seq_lengths = batch
+            padded, mask, flat, los_labels, mort_labels, seq_lengths = batch
         else:
-            padded, mask, diagnoses, flat, labels, seq_lengths = batch
+            padded, mask, diagnoses, flat, los_labels, mort_labels, seq_lengths = batch
 
-        test_y = np.append(test_y, remove_padding(labels, mask.type(bool_type), device))
+        test_y = np.append(test_y, remove_padding(los_labels, mask.type(bool_type), device))
 
     test_y = pd.DataFrame(test_y, columns=['true'])
 

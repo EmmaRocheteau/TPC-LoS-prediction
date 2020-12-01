@@ -19,11 +19,11 @@ def get_hyperparam_config(dataset):
 
     # hyper-parameter grid
     param_grid = {
-        'n_layers': [5, 6, 7, 8, 9, 10, 11, 12],
+        'n_layers': [5, 6, 7, 8, 9, 10, 11, 12],  # most promising range is 5-12 layers
         'temp_kernels': list(int(x) for x in np.logspace(np.log2(4), np.log2(16), base=2, num=16)),
         'point_sizes': list(int(x) for x in np.logspace(np.log2(4), np.log2(16), base=2, num=16)),
         'learning_rate': list(np.logspace(np.log10(0.001), np.log10(0.01), base=10, num=100)),
-        'batch_size': list(int(x) for x in np.logspace(np.log2(4), np.log2(512), base=2, num=8)),
+        'batch_size': list(int(x) for x in np.logspace(np.log2(4), np.log2(512), base=2, num=8)),  # might have to search between 4 and 32 to avoid memory issues
         'temp_dropout_rate': [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5],
         'kernel_size': {#1: list(range(4, 25)),
                         #2: [5, 6, 7, 8, 9, 10],

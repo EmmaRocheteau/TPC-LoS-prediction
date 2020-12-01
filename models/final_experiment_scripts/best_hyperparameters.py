@@ -16,8 +16,13 @@ def best_tpc(c):
     c['mode'] = 'test'
     c['model_type'] = 'tpc'
     if c['dataset'] == 'eICU':
-        c['n_epochs'] = 15 if c['percentage_data'] > 6.25 else 8
-        c['batch_size']= 32
+        if c['percentage_date'] == 6.25:
+            c['n_epochs'] = 8
+        elif c['task'] == 'mortality':
+            c['n_epochs'] = 6
+        else:
+            c['n_epochs'] = 15
+        c['batch_size'] = 32
         c['n_layers'] = 9
         c['kernel_size'] = 4
         c['no_temp_kernels'] = 12
@@ -28,7 +33,7 @@ def best_tpc(c):
         c['point_sizes'] = [13] * 9
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
-        c['n_epochs'] = None
+        c['n_epochs'] = None if c['task'] is not 'mortality' else 6
         c['batch_size']= None
         c['n_layers'] = None
         c['kernel_size'] = None

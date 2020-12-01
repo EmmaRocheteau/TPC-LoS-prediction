@@ -17,13 +17,13 @@ def get_hyperparam_config(dataset):
 
     # hyper-parameter grid
     param_grid = {
-        'batchnorm': ['mybatchnorm', 'pointonly', 'temponly', 'low_momentum', 'none', 'default'],
+        #'batchnorm': ['mybatchnorm', 'pointonly', 'temponly', 'low_momentum', 'none', 'default'],
         'main_dropout_rate': [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5],
         'last_linear_size': list(int(x) for x in np.logspace(np.log2(16), np.log2(64), base=2, num=16)),
         'diagnosis_size': list(int(x) for x in np.logspace(np.log2(16), np.log2(64), base=2, num=16)),
     }
 
-    c['batchnorm'] = random.choice(param_grid['batchnorm'])
+    #c['batchnorm'] = random.choice(param_grid['batchnorm'])
     c['main_dropout_rate'] = random.choice(param_grid['main_dropout_rate'])
     c['last_linear_size'] = random.choice(param_grid['last_linear_size'])
     c['diagnosis_size'] = random.choice(param_grid['diagnosis_size'])
