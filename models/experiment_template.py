@@ -117,7 +117,7 @@ class ExperimentTemplate(PytorchExperiment):
             if self.config.task in ('LoS', 'multitask'):
                 train_y_hat_los = np.append(train_y_hat_los, self.remove_padding(y_hat_los, mask.type(self.bool_type)))
                 train_y_los = np.append(train_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
-            if self.config.task in ('mortality', 'multitask'):
+            if self.config.task in ('mortality', 'multitask') and mort_labels.shape[1] >= mort_pred_time:
                 train_y_hat_mort = np.append(train_y_hat_mort,
                                              self.remove_padding(y_hat_mort[:, mort_pred_time],
                                                                  mask.type(self.bool_type)[:, mort_pred_time]))
@@ -198,7 +198,7 @@ class ExperimentTemplate(PytorchExperiment):
                     val_y_hat_los = np.append(val_y_hat_los,
                                                 self.remove_padding(y_hat_los, mask.type(self.bool_type)))
                     val_y_los = np.append(val_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
-                if self.config.task in ('mortality', 'multitask'):
+                if self.config.task in ('mortality', 'multitask') and mort_labels.shape[1] >= mort_pred_time:
                     val_y_hat_mort = np.append(val_y_hat_mort,
                                                  self.remove_padding(y_hat_mort[:, mort_pred_time],
                                                                      mask.type(self.bool_type)[:, mort_pred_time]))
@@ -260,7 +260,7 @@ class ExperimentTemplate(PytorchExperiment):
                 test_y_hat_los = np.append(test_y_hat_los,
                                           self.remove_padding(y_hat_los, mask.type(self.bool_type)))
                 test_y_los = np.append(test_y_los, self.remove_padding(los_labels, mask.type(self.bool_type)))
-            if self.config.task in ('mortality', 'multitask'):
+            if self.config.task in ('mortality', 'multitask') and mort_labels.shape[1] >= mort_pred_time:
                 test_y_hat_mort = np.append(test_y_hat_mort,
                                            self.remove_padding(y_hat_mort[:, mort_pred_time],
                                                                mask.type(self.bool_type)[:, mort_pred_time]))
