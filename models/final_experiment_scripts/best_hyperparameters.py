@@ -16,7 +16,7 @@ def best_tpc(c):
     c['mode'] = 'test'
     c['model_type'] = 'tpc'
     if c['dataset'] == 'eICU':
-        if c['percentage_date'] == 6.25:
+        if c['percentage_data'] == 6.25:
             c['n_epochs'] = 8
         elif c['task'] == 'mortality':
             c['n_epochs'] = 6
