@@ -90,8 +90,8 @@ def best_cw_lstm(c):
             c['n_epochs'] = 30
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
-        c['batch_size'] = 128  # lowered from 512 because of memory issues
-        c['hidden_size'] = None
+        c['hidden_size'] = 8
+        c['n_epochs'] = 15
     return c
 
 
