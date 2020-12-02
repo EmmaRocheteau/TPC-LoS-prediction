@@ -48,7 +48,7 @@ Transformer | 2.36±0.00 | 114.1±0.6 | 26.7±0.1 | 1.43±0.00 | 0.09±0.00 | 0.
 TPC | 1.78±0.02 | 63.5±4.3 | 21.7±0.5 | 0.70±0.03 | 0.27±0.02 | 0.58±0.01
 
 Our model (TPC) significantly outperforms all baselines by large margins. 
-*The mean and median "models" always predict 3.5 and 1.7 days respectively (the mean and median of the training set).
+*The mean and median "models" always predict 3.47 and 1.67 days respectively (the mean and median of the training set).
 
 #### MIMIC-IV
 
@@ -63,11 +63,17 @@ CW LSTM | | | | | |
 Transformer | 3.62±0.02 | 113.8±1.8 | 63.4±0.5 | 1.21±0.01 | 0.18±0.01| 0.45±0.00
 TPC | | | | | |
 
-*The mean and median "models" always predict 5.7 and 2.7 days respectively (the mean and median of the training set).
+*The mean and median "models" always predict 5.70 and 2.70 days respectively (the mean and median of the training set).
 
 ### Mortality Prediction
 
 More results coming soon! 
+
+We report on the following metrics: 
+- Area under the receiver operating characteristic curve (AUROC)
+- Area under the precision recall curve (AUPRC)
+
+For both metrics, higher is better.
 
 #### eICU
 
@@ -89,7 +95,7 @@ TPC | |
 
 ### Multitask Prediction
 
-More results coming soon! These are results when the model is trained to solve length of stay and mortality at the same time.
+More results coming soon! These are the results when the model is trained to solve length of stay and mortality at the same time.
 
 #### eICU
 
