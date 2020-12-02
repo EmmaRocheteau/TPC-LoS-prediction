@@ -74,7 +74,7 @@ def main(dataset, task, experiment):
     return
 
 if __name__=='__main__':
-    dataset = 'MIMIC'
-    task = 'LoS'
-    experiment = 'Transformer'
+    dataset = 'eICU'
+    task = 'multitask'
+    experiment = 'TPC'
     main(dataset, task, experiment)
