@@ -69,6 +69,12 @@ TPC | | | | | |
 
 More results coming soon! 
 
+We report on the following metrics: 
+- Area under the receiver operating characteristic curve (AUROC)
+- Area under the precision recall curve (AUPRC)
+
+For both metrics, higher is better.
+
 #### eICU
 
 Model | AUROC | AUPRC
