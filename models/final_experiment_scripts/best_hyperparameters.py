@@ -82,7 +82,7 @@ def best_cw_lstm(c):
         c['hidden_size'] = 8
         if c['percentage_data'] < 25:
             c['n_epochs'] = 15
-        elif c['percentage_data'] == 25:
+        elif c['percentage_data'] == 25 or c['task'] == 'mortality':
             c['n_epochs'] = 20
         elif c['percentage_data'] == 50:
             c['n_epochs'] = 25
