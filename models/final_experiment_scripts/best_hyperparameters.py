@@ -91,7 +91,7 @@ def best_cw_lstm(c):
     elif c['dataset'] == 'MIMIC':
         c['no_diag'] = True
         c['hidden_size'] = 8
-        c['n_epochs'] = 15
+        c['n_epochs'] = 20
     return c
 
 
