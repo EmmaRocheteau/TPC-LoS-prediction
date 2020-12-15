@@ -1,4 +1,5 @@
 def best_global(c):
+    c['alpha'] = 100
     if c['dataset'] == 'eICU':
         c['main_dropout_rate'] = 0.45
         c['last_linear_size'] = 17

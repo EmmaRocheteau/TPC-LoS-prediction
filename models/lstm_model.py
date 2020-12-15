@@ -33,6 +33,7 @@ class BaseLSTM(nn.Module):
         self.D = D
         self.no_flat_features = no_flat_features
         self.no_exp = config.no_exp
+        self.alpha = config.alpha
         self.momentum = 0.01 if self.batchnorm == 'low_momentum' else 0.1
         self.no_diag = config.no_diag
 
@@ -167,10 +168,10 @@ class BaseLSTM(nn.Module):
 
         return los_predictions, mort_predictions
 
-    def loss(self, y_hat_los, y_hat_mort, y_los, y_mort, mask, seq_lengths, device, sum_losses, loss_type, alpha=100):
+    def loss(self, y_hat_los, y_hat_mort, y_los, y_mort, mask, seq_lengths, device, sum_losses, loss_type):
         # mort loss
         if self.task == 'mortality':
-            loss = self.bce_loss(y_hat_mort, y_mort) * alpha
+            loss = self.bce_loss(y_hat_mort, y_mort) * self.alpha
         # los loss
         else:
             bool_type = torch.cuda.BoolTensor if device == torch.device('cuda') else torch.BoolTensor
@@ -182,5 +183,5 @@ class BaseLSTM(nn.Module):
                 loss = los_loss
             # multitask loss
             if self.task == 'multitask':
-                loss = los_loss + self.bce_loss(y_hat_mort, y_mort) * alpha
+                loss = los_loss + self.bce_loss(y_hat_mort, y_mort) * self.alpha
         return loss

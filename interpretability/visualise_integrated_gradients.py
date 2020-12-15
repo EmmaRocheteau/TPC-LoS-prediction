@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from shap import summary_plot
 import matplotlib.pyplot as plt
-from sklearn.inspection import permutation_importance
 
 
 def attr_plot(feature_type, plot_size):
@@ -32,10 +31,10 @@ def attr_plot(feature_type, plot_size):
         xlim = (-3, 3)
         xticks = ['-3-', '-2', '-1', '0', '1', '2', '3+']
         xlabels = [-3, -2, -1, 0, 1, 2, 3]
-    features = pd.read_csv('interpretability/{}_fts48.csv'.format(shorthand), header=None).values
+    features = pd.read_csv('interpretability/{}_fts24.csv'.format(shorthand), header=None).values
     feature_names = list(pd.read_csv('eICU_data/test/{}.csv'.format(feature_type), nrows=0).columns)
     feature_names.pop(0)
-    attr = pd.read_csv('interpretability/{}_attr48.csv'.format(shorthand), header=None).values
+    attr = pd.read_csv('interpretability/{}_attr24.csv'.format(shorthand), header=None).values
     attr = attr.clip(min=xlim[0], max=xlim[1])
     # features with zero attribution
     nonzero_attr = np.nansum(attr, axis=0).nonzero()[0]
@@ -48,15 +47,15 @@ def attr_plot(feature_type, plot_size):
     features = np.nan_to_num(features, 0)
     attr = np.nan_to_num(attr, 0)
     summary_plot(attr, features=features, feature_names=feature_names, show=False, plot_size=plot_size,
-                 plot_type='bar', sort=True, max_display=25, color_bar=color_bar)
+                 plot_type='bar', sort=True, max_display=25, color_bar=color_bar, color='#55a9da')
     plt.tight_layout()
     plt.xlabel('Average Integrated Gradient')
     #plt.xticks(xlabels, xticks)
-    plt.savefig('figures/{}_plot48.png'.format(shorthand), dpi=300)
+    plt.savefig('figures/{}_plot24.pdf'.format(shorthand), dpi=300)
     plt.show()
 
     return
 
 # diag not important for model so attributions meaningless
 # timeseries too noisy so we take the mean absolute attribution over the whole timeseries
-attr_plot('abs_timeseries', (10, 7))
+attr_plot('abs_timeseries', (7.5, 5.5))

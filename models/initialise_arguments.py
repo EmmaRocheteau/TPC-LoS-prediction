@@ -32,6 +32,7 @@ def initialise_arguments():
     parser.add_argument('-no_exp', action='store_true')
 
     # shared hyper-parameters
+    parser.add_argument('--alpha', default=100, type=int)  # for multitask
     parser.add_argument('--main_dropout_rate', default=0.45, type=float)
     parser.add_argument('--L2_regularisation', default=0, type=float)
     parser.add_argument('--last_linear_size', default=17, type=int)

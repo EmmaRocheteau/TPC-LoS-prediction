@@ -26,8 +26,8 @@ def preprocess_flat(flat):
     # convert the categorical features to one-hot
     flat = pd.get_dummies(flat, columns=cat_features)
 
-    # 10 patients have NaN for age; we fill this with the mean value which is 64
-    flat['age'].fillna('64', inplace=True)
+    # 10 patients have NaN for age; we fill this with the mean value which is 63
+    flat['age'].fillna('63', inplace=True)
     # some of the ages are like '> 89' rather than numbers, this needs removing and converting to numbers
     # but we make an extra variable to keep this information
     flat['> 89'] = flat['age'].str.contains('> 89').astype(int)
