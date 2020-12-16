@@ -52,22 +52,20 @@ Our model (TPC) significantly outperforms all baselines by large margins.
 
 #### MIMIC-IV
 
-More results coming soon! Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
+Please note that this is not the same cohort as used in Harutyunyan et al. 2019. They use the older MIMIC-III database and I have developed my own preprocessing pipeline to closely match that of eICU.
 
 Model | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | ---
-Mean* | 5.24 | 474.9 | 77.7 | 2.80 | 0.00 | 0.00
+Mean* | 5.24 | 474.9 | 77.7 | 2.80 | 0.000.00
 Median* | 4.60 | 216.8 | 86.8 | 2.09 | -0.12 | 0.00
 LSTM | 3.68±0.02 | 107.2±3.1 | 65.7±0.7 | 1.26±0.01 | 0.15±0.01 | 0.43±0.01
-CW LSTM | | | | | | 
-Transformer | 3.62±0.02 | 113.8±1.8 | 63.4±0.5 | 1.21±0.01 | 0.18±0.01| 0.45±0.00
-TPC | | | | | |
+CW LSTM | 3.68±0.02 | 107.0±1.8 | 66.4±0.6 | 1.23±0.01 | 0.15±0.01 | 0.43±0.00
+Transformer | 3.62±0.02 | 113.8±1.8 | 63.4±0.5 | 1.21±0.01 | 0.18±0.01 | 0.45±0.00
+TPC | 2.39±0.03 | 47.6±1.4 | 46.3±1.3 | 0.39±0.02 | 0.40±0.02 | 0.78±0.01
 
 *The mean and median "models" always predict 5.70 and 2.70 days respectively (the mean and median of the training set).
 
 ### Mortality Prediction
-
-More results coming soon! 
 
 We report on the following metrics: 
 - Area under the receiver operating characteristic curve (AUROC)
@@ -80,40 +78,40 @@ For both metrics, higher is better.
 Model | AUROC | AUPRC
 --- | --- | --- 
 LSTM | 0.849±0.002 | 0.407±0.012
-CW LSTM | |
+CW LSTM | 0.855±0.001 | 0.464±0.004
 Transformer | 0.851±0.002 | 0.454±0.005
-TPC | |
+TPC | 0.864±0.001 | 0.508±0.005
 
 #### MIMIC-IV
 
 Model | AUROC | AUPRC
 --- | --- | --- 
 LSTM | 0.895±0.001 | 0.657±0.003 
-CW LSTM | |
+CW LSTM | 0.897±0.002 | 0.650±0.005
 Transformer | 0.890±0.002 | 0.641±0.008
-TPC | |
+TPC | 0.905±0.001 | 0.691±0.006
 
 ### Multitask Prediction
 
-More results coming soon! These are the results when the model is trained to solve length of stay and mortality at the same time.
+These are the results when the model is trained to solve length of stay and mortality at the same time.
 
 #### eICU
 
 Model | AUROC | AUPRC | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | --- | --- | ---
 LSTM | 0.852±0.003 | 0.436±0.007 | 2.40±0.01 | 116.5±0.8 | 27.2±0.2 | 1.47±0.01 | 0.08±0.01 | 0.28±0.01
-CW LSTM | | | | | | | |
+CW LSTM | 0.865±0.002 | 0.490±0.007 | 2.37±0.00 | 115.0±0.7 | 26.8±0.1 | 1.44±0.00 | 0.09±0.00 | 0.30±0.00
 Transformer | 0.858±0.001 | 0.475±0.004 | 2.36±0.00 | 114.2±0.7 | 26.6±0.1 | 1.43±0.00 | 0.10±0.00 | 0.30±0.00
-TPC | | | | | | | |
+TPC | 0.865±0.002 | 0.523±0.006 | 1.55±0.01 | 46.4±2.6 | 18.7±0.2 | 0.40±0.02 | 0.37±0.01 | 0.70±0.00
 
 #### MIMIC-IV
 
 Model | AUROC | AUPRC | MAD | MAPE | MSE | MSLE | R<sup>2</sup> | Kappa
 --- | --- | --- | --- | --- | --- | --- | --- | ---
 LSTM | 0.896±0.002 | 0.659±0.004 | 3.66±0.01 | 106.8±2.7 | 65.3±0.6 | 1.25±0.01 | 0.16±0.01 | 0.44±0.00
-CW LSTM | | | | | | | |
+CW LSTM | 0.899±0.002 | 0.654±0.003 | 3.69±0.02 | 107.2±1.6 | 66.3±0.6 | 1.23±0.01 | 0.15±0.01 | 0.44±0.00
 Transformer | 0.898±0.001 | 0.656±0.005 | 3.61±0.01 | 112.3±2.0 | 63.3±0.3 | 1.20±0.01 | 0.19±0.00 | 0.45±0.00
-TPC | | | | | | | |
+TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0.00 | 0.46±0.02 | 0.85±0.00
 
 ## Implementation Instructions
 
