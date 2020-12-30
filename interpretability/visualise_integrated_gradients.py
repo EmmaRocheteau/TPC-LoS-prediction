@@ -46,12 +46,20 @@ def attr_plot(feature_type, plot_size):
     feature_names = [feature_names[i] for i in nonzero_attr]
     features = np.nan_to_num(features, 0)
     attr = np.nan_to_num(attr, 0)
+    # rename some variables to make it look nice:
+    renaming = {'-eos': 'Eosinophils', '-basos': 'Basophils',
+                'systemicmean': 'Systemic Mean BP', 'Glasglow coma score': 'Glasgow Coma Score', 'lactate': 'Lactate',
+                'troponin - I': 'Troponin I', 'total bilirubin': 'Total Bilirubin', 'alkaline phos.': 'Alkaline Phosphatase',
+                }
+    feature_names = [renaming.get(n, n) for n in feature_names]
+
+
     summary_plot(attr, features=features, feature_names=feature_names, show=False, plot_size=plot_size,
                  plot_type='bar', sort=True, max_display=25, color_bar=color_bar, color='#55a9da')
     plt.tight_layout()
     plt.xlabel('Average Integrated Gradient')
     #plt.xticks(xlabels, xticks)
-    plt.savefig('figures/{}_plot24.pdf'.format(shorthand), dpi=300)
+    plt.savefig('figures/{}_plot24.pdf'.format(shorthand), dpi=400)
     plt.show()
 
     return
