@@ -9,12 +9,13 @@ This repository contains the code used for Temporal Pointwise Convolutional Netw
 If you use this code or the models in your research, please cite the following:
 
 ```
-@article{rocheteau2020temporal,
-  title={{Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit}},
-  author={Emma Rocheteau and P. Li{\'o} and Stephanie L. Hyland},
-  journal={ArXiv},
-  year={2020},
-  volume={abs/2007.09483}
+@misc{rocheteau2020temporal,
+      title={Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit}, 
+      author={Emma Rocheteau and Pietro Liò and Stephanie Hyland},
+      year={2020},
+      eprint={2007.09483},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
 }
 ```
 
