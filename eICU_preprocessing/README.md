@@ -31,5 +31,35 @@ eICU pre-processing
 5) Then run the pre-processing scripts in your terminal. This will need to run overnight:
 
     ```
-    python eICU_preprocessing/run_all_preprocessing.py
+    python3 -m eICU_preprocessing.run_all_preprocessing
     ```
+    
+```bash
+eICU_data
+├── test
+│   ├── diagnoses.csv
+│   ├── flat.csv
+│   ├── labels.csv
+│   ├── stays.txt
+│   └── timeseries.csv
+├── train
+│   ├── diagnoses.csv
+│   ├── flat.csv
+│   ├── labels.csv
+│   ├── stays.txt
+│   └── timeseries.csv
+├── val
+│   ├── diagnoses.csv
+│   ├── flat.csv
+│   ├── labels.csv
+│   ├── stays.txt
+│   └── timeseries.csv
+├── diagnoses.csv
+├── flat_features.csv
+├── labels.csv
+├── timeseriesaperiodic.csv
+├── timeserieslab.csv
+├── timeseriesnurse.csv
+├── timeseriesperiodic.csv
+└── timeseriesresp.csv
+```

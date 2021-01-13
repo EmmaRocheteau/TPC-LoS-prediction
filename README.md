@@ -9,13 +9,12 @@ This repository contains the code used for Temporal Pointwise Convolutional Netw
 If you use this code or the models in your research, please cite the following:
 
 ```
-@misc{rocheteau2020,
-    title={Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit},
-    author={Emma Rocheteau and Pietro Liò and Stephanie Hyland},
-    year={2020},
-    eprint={2007.09483},
-    archivePrefix={arXiv},
-    primaryClass={cs.LG}
+@article{rocheteau2020temporal,
+  title={{Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit}},
+  author={Emma Rocheteau and P. Li{\'o} and Stephanie L. Hyland},
+  journal={ArXiv},
+  year={2020},
+  volume={abs/2007.09483}
 }
 ```
 
@@ -149,7 +148,7 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
 5) Then run the pre-processing scripts in your terminal. This will need to run overnight:
 
     ```
-    python eICU_preprocessing/run_all_preprocessing.py
+    python3 -m eICU_preprocessing.run_all_preprocessing
     ```
     
 ### MIMIC-IV pre-processing
@@ -185,7 +184,7 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
 5) Then run the pre-processing scripts in your terminal. This will need to run overnight:
 
     ```
-    python MIMIC_preprocessing/run_all_preprocessing.py
+    python3 -m MIMIC_preprocessing.run_all_preprocessing
     ```
     
    
@@ -193,13 +192,13 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
 1) Once you have run the pre-processing steps you can run all the models in your terminal. Set the working directory to the TPC-LoS-prediction, and run the following:
 
     ```
-    python -m models.run_tpc
+    python3 -m models.run_tpc
     ```
     
     Note that your experiment can be customised by using command line arguments e.g.
     
     ```
-    python -m models.run_tpc --dataset eICU --task LoS --model_type tpc --n_layers 4 --kernel_size 3 --no_temp_kernels 10 --point_size 10 --last_linear_size 20 --diagnosis_size 20 --batch_size 64 --learning_rate 0.001 --main_dropout_rate 0.3 --temp_dropout_rate 0.1 
+    python3 -m models.run_tpc --dataset eICU --task LoS --model_type tpc --n_layers 4 --kernel_size 3 --no_temp_kernels 10 --point_size 10 --last_linear_size 20 --diagnosis_size 20 --batch_size 64 --learning_rate 0.001 --main_dropout_rate 0.3 --temp_dropout_rate 0.1 
     ```
     
     Each experiment you run will create a directory within models/experiments. The naming of the directory is based on 
@@ -209,19 +208,19 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
 2) The hyperparameter searches can be replicated by running:
 
     ```
-    python -m models.hyperparameter_scripts.eICU.tpc
+    python3 -m models.hyperparameter_scripts.eICU.tpc
     ```
  
     Trixi provides a useful way to visualise effects of the hyperparameters (after running the following command, navigate to http://localhost:8080 in your browser):
     
     ```
-    python -m trixi.browser --port 8080 models/experiments/hyperparameters/eICU/TPC
+    python3 -m trixi.browser --port 8080 models/experiments/hyperparameters/eICU/TPC
     ```
     
     The final experiments for the paper are found in models/final_experiment_scripts e.g.:
     
     ```
-    python -m models.final_experiment_scripts.eICU.LoS.tpc
+    python3 -m models.final_experiment_scripts.eICU.LoS.tpc
     ```
     
 ### References

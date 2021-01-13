@@ -33,5 +33,30 @@ MIMIC-IV pre-processing
 5) Then run the pre-processing scripts in your terminal. This will need to run overnight:
 
     ```
-    python MIMIC_preprocessing/run_all_preprocessing.py
+    python3 -m MIMIC_preprocessing.run_all_preprocessing
     ```
+    
+It will create the following directory structure:
+   
+```bash
+MIMIC_data
+├── test
+│   ├── flat.csv
+│   ├── labels.csv
+│   ├── stays.txt
+│   └── timeseries.csv
+├── train
+│   ├── flat.csv
+│   ├── labels.csv
+│   ├── stays.txt
+│   └── timeseries.csv
+├── val
+│   ├── flat.csv
+│   ├── labels.csv
+│   ├── stays.txt
+│   └── timeseries.csv
+├── flat_features.csv
+├── labels.csv
+├── timeseries.csv
+└── timeserieslab.csv
+```
