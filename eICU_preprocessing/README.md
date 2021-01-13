@@ -33,7 +33,9 @@ eICU pre-processing
     ```
     python3 -m eICU_preprocessing.run_all_preprocessing
     ```
-    
+  
+It will create the following directory structure:
+
 ```bash
 eICU_data
 ├── test
