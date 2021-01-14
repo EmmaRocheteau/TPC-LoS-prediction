@@ -1,6 +1,6 @@
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/temporal-pointwise-convolutional-networks-for/predicting-patient-outcomes-on-eicu)](https://paperswithcode.com/sota/predicting-patient-outcomes-on-eicu?p=temporal-pointwise-convolutional-networks-for)
 
-Length of Stay Prediction with TPC Networks
+Patient Outcome Prediction with TPC Networks
 ===============================
 
 This repository contains the code used for Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit. 
