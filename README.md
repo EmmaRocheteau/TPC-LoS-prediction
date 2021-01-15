@@ -11,7 +11,7 @@ If you use this code or the models in your research, please cite the following:
 ```
 @misc{rocheteau2020temporal,
       title={Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit}, 
-      author={Emma Rocheteau and Pietro Liò and Stephanie Hyland},
+      author={Emma Rocheteau and Pietro Lio and Stephanie Hyland},
       year={2020},
       eprint={2007.09483},
       archivePrefix={arXiv},
