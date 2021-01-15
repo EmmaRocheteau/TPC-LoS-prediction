@@ -115,9 +115,9 @@ CW LSTM | 0.899±0.002 | 0.654±0.003 | 3.69±0.02 | 107.2±1.6 | 66.3±0.6 | 1.
 Transformer | 0.898±0.001 | 0.656±0.005 | 3.61±0.01 | 112.3±2.0 | 63.3±0.3 | 1.20±0.01 | 0.19±0.00 | 0.45±0.00
 TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0.00 | 0.46±0.02 | 0.85±0.00
 
-## Implementation Instructions
+## Pre-processing Instructions
 
-### eICU pre-processing
+### eICU
 
 1) To run the sql files you must have the eICU database set up: https://physionet.org/content/eicu-crd/2.0/. 
 
@@ -152,7 +152,8 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
     python3 -m eICU_preprocessing.run_all_preprocessing
     ```
     
-### MIMIC-IV pre-processing
+### MIMIC-IV
+
 1) To run the sql files you must have the MIMIC-IV database set up: https://physionet.org/content/mimiciv/0.4/. 
 
 2) The official recommended way to access MIMIC-IV is via BigQuery: https://mimic-iv.mit.edu/docs/access/bigquery/. Personally I did not find it easy to store the necessary views and there is a 1GB size limit on the data you can download in the free tier, which is less than I am using here (the largest file to extract is timeseries.csv which is 4.49GB). However if you do wish to use BigQuery, note that you will have to make minor modifications to the code e.g. you would need to replace a reference to the table `patients` with `physionet-data.mimic_core.patients`. 
@@ -189,7 +190,7 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
     ```
     
    
-### Running the models
+## Running the models
 1) Once you have run the pre-processing steps you can run all the models in your terminal. Set the working directory to the TPC-LoS-prediction, and run the following:
 
     ```
@@ -224,5 +225,5 @@ TPC | 0.918±0.002 | 0.713±0.007 | 2.28±0.07 | 32.4±1.2 | 42.0±1.2 | 0.19±0
     python3 -m models.final_experiment_scripts.eICU.LoS.tpc
     ```
     
-### References
+## References
 Hrayr Harutyunyan, Hrant Khachatrian, David C. Kale, Greg Ver Steeg, and Aram Galstyan. Multitask Learning and Benchmarking with Clinical Time Series Data. Scientific Data, 6(96), 2019.
