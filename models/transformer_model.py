@@ -150,7 +150,7 @@ class Transformer(nn.Module):
 
         return
 
-    def forward(self, X, diagnoses, flat):
+    def forward(self, X, diagnoses, flat, time_before_pred=5):
 
         # flat is B * no_flat_features
         # diagnoses is B * D
@@ -164,24 +164,24 @@ class Transformer(nn.Module):
 
         X_final = self.relu(self.trans_dropout(trans_output))  # B * d_model * T
 
-        # note that we cut off at 5 hours here because the model is only valid from 5 hours onwards
+        # note that we cut off at time_before_pred hours here because the model is only valid from time_before_pred hours onwards
         if self.no_diag:
-            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
-                                     X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
+            combined_features = cat((flat.repeat_interleave(T - time_before_pred, dim=0),  # (B * (T - time_before_pred)) * no_flat_features
+                                     X_final[:, :, time_before_pred:].permute(0, 2, 1).contiguous().view(B * (T - time_before_pred), -1)), dim=1)
         else:
             diagnoses_enc = self.relu(self.main_dropout(self.bn_diagnosis_encoder(self.diagnosis_encoder(diagnoses))))  # B * diagnosis_size
-            combined_features = cat((flat.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * no_flat_features
-                                     diagnoses_enc.repeat_interleave(T - 5, dim=0),  # (B * (T - 5)) * diagnosis_size
-                                     X_final[:, :, 5:].permute(0, 2, 1).contiguous().view(B * (T - 5), -1)), dim=1)
+            combined_features = cat((flat.repeat_interleave(T - time_before_pred, dim=0),  # (B * (T - time_before_pred)) * no_flat_features
+                                     diagnoses_enc.repeat_interleave(T - time_before_pred, dim=0),  # (B * (T - time_before_pred)) * diagnosis_size
+                                     X_final[:, :, time_before_pred:].permute(0, 2, 1).contiguous().view(B * (T - time_before_pred), -1)), dim=1)
 
         last_point_los = self.relu(self.main_dropout(self.bn_point_last_los(self.point_los(combined_features))))
         last_point_mort = self.relu(self.main_dropout(self.bn_point_last_mort(self.point_mort(combined_features))))
 
         if self.no_exp:
-            los_predictions = self.hardtanh(self.point_final_los(last_point_los).view(B, T - 5))  # B * (T - 5)
+            los_predictions = self.hardtanh(self.point_final_los(last_point_los).view(B, T - time_before_pred))  # B * (T - time_before_pred)
         else:
-            los_predictions = self.hardtanh(exp(self.point_final_los(last_point_los).view(B, T - 5)))  # B * (T - 5)
-        mort_predictions = self.sigmoid(self.point_final_mort(last_point_mort).view(B, T - 5))  # B * (T - 5)
+            los_predictions = self.hardtanh(exp(self.point_final_los(last_point_los).view(B, T - time_before_pred)))  # B * (T - time_before_pred)
+        mort_predictions = self.sigmoid(self.point_final_mort(last_point_mort).view(B, T - time_before_pred))  # B * (T - time_before_pred)
 
         return los_predictions, mort_predictions
 
