@@ -11,17 +11,23 @@ This repository contains the code used for **Temporal Pointwise Convolutional Ne
 If you use this code or the models in your research, please cite the following:
 
 ```
-@misc{rocheteau2020temporal,
-      title={Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit}, 
-      author={Emma Rocheteau and Pietro Lio and Stephanie Hyland},
-      year={2020},
-      eprint={2007.09483},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@inproceedings{rocheteau2021,
+author = {Rocheteau, Emma and Li\`{o}, Pietro and Hyland, Stephanie},
+title = {Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit},
+year = {2021},
+isbn = {9781450383592},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3450439.3451860},
+doi = {10.1145/3450439.3451860},
+booktitle = {Proceedings of the Conference on Health, Inference, and Learning},
+pages = {58–68},
+numpages = {11},
+keywords = {intensive care unit, length of stay, temporal convolution, mortality, patient outcome prediction},
+location = {Virtual Event, USA},
+series = {CHIL '21}
 }
 ```
-
-Now accepted at ACM CHIL 2021! Watch this space.
 
 ## Motivation
 The pressure of ever-increasing patient demand and budget restrictions make hospital bed management a daily challenge for clinical staff. Most critical is the efficient allocation of resource-heavy Intensive Care Unit (ICU) beds to the patients who need life support. Central to solving this problem is knowing for how long the current set of ICU patients are likely to stay in the unit. In this work, we propose a new deep learning model based on the combination of temporal convolution and pointwise (1x1) convolution, to solve the length of stay prediction task on the eICU and MIMIC-IV critical care datasets. The model – which we refer to as Temporal Pointwise Convolution (TPC) – is specifically designed to mitigate common challenges with Electronic Health Records, such as skewness, irregular sampling and missing data. In doing so, we have achieved significant performance benefits of 18-68% (metric and dataset dependent) over the commonly used Long-Short Term Memory (LSTM) network, and the multi-head self-attention network known as the Transformer. By adding mortality prediction as a side-task, we can improve performance further still, resulting in a mean absolute deviation of 1.55 days (eICU) and 2.28 days (MIMIC-IV) on predicting remaining length of stay.
