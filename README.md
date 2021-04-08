@@ -5,7 +5,7 @@ Patient Outcome Prediction with TPC Networks
 
 This repository contains the code used for **Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit** (published at **ACM CHIL 2021**) and implementation instructions. You can watch a brief project talk here:
 
-[![Watch the video](https://www.youtube.com/watch?v=bDRbATjlUmY/maxresdefault.jpg)](https://www.youtube.com/watch?v=bDRbATjlUmY)
+[![Watch the video](https://i.ytimg.com/vi/bDRbATjlUmY/maxresdefault.jpg)](https://www.youtube.com/watch?v=bDRbATjlUmY)
  
 ## Citation
 If you use this code or the models in your research, please cite the following:
