@@ -8,6 +8,7 @@ def initialise_arguments():
 
     # general
     parser.add_argument('--dataset', default='eICU', type=str)
+    parser.add_argument('--model_type', default='tpc', type=str)
     parser.add_argument('-disable_cuda', action='store_true')
     parser.add_argument('-intermediate_reporting', action='store_true')
     parser.add_argument('--batch_size_test', default=32, type=int)
