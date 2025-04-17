@@ -3,7 +3,11 @@
 Patient Outcome Prediction with TPC Networks
 ===============================
 
-This repository contains the code used for **Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit** (published at **ACM CHIL 2021**) and implementation instructions. You can watch a brief project talk here:
+This repository contains the code used for **Temporal Pointwise Convolutional Networks for Length of Stay Prediction in the Intensive Care Unit** (published at **ACM CHIL 2021**) and implementation instructions. 
+
+***Note that I have since updated and improved the readibility, memory usage and speed of the network without changing the architecture. You can find the updated implementation at: [https://github.com/EmmaRocheteau/Cambridge_TPC/src/models/tpc.py](https://github.com/EmmaRocheteau/Cambridge_TPC/blob/main/src/models/tpc.py). It may require minor edits to make it compatible with this repository, but it should be easier to plug into other projects.
+
+You can watch a brief project talk here:
 
 [![Watch the video](https://i.ytimg.com/vi/bDRbATjlUmY/maxresdefault.jpg)](https://www.youtube.com/watch?v=bDRbATjlUmY)
  
